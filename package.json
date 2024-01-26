@@ -1,5 +1,5 @@
 {
-  "name": "FlexJson",
+  "name": "flex-json",
   "version": "0.0.1",
   "description": "This is a library that makes each 'Node' in the JSON Object/Array a JSON Object with a Key/Value pair.",
   "main": "FlexJsonClass.js",
