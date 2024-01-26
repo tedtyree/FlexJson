@@ -7,6 +7,7 @@
 - [Install](#install)
 - [Usage](#usage)
 - [Why flex-json](#why-flex-json)
+- [How the library works](#how-the-library-works)
 
 
 ## Install
