@@ -6,6 +6,8 @@
 
 - [Install](#install)
 - [Usage](#usage)
+- [Why flex-json](#why-flex-json)
+
 
 ## Install
 
@@ -67,6 +69,89 @@ console.log(myJson.getBool('flag', false)); // Get boolean value by key with a d
 
 ```
 
+Serialization and Deserialization examples
+
+```javascript
+import { FlexJson } from 'npm-package-template';
+
+// Create an instance of FlexJson
+const flexJson = new FlexJson();
+
+// Example: Deserialize JSON
+const jsonString = '{"name": "John", "age": 30, "city": "New York"}';
+flexJson.Deserialize(jsonString);
+
+// Example: Serialize to JSON
+flexJson.SerializeMe();
+
+// Access serialized JSON string
+const serializedJson = flexJson.getSerializedJson();
+console.log(serializedJson);
+```
+
+## Why flex-json
+
+It is simply Json with comments! FlexJson was written to make JSON config files easy to manage and allow for comments. The library also makes it super easy to read a json file (often a config file), modify a single value, and save the file back to the file system without messing up the comments.
+
+- Easy config file formatting
+- Includes comments in both /* */ and // notation
+- Simple to edit Json files
+- Allows for other JavaScript like features such as using either single quotes or double quotes.
+- Can also be used within Node.js apps for other uses such as reading/writing JSON to/from database records and parsing loosely formattted Json in web page content.
+
+## How the library works
+
+### Flex-json syntax
+BTW FlexJson as a standard of syntax is not really all that new - it is very much in existence within JavaScript and other syntax standards. Here we just make it available in a library and to facilitate config file parsing and editing.
+
+### Strict Mode
+
+When in strict mode, the FlexJson library reads JSON files in standard JSON format. Comments are not valid and double quotes are required around strings.
+
+Note: If the library is flagged to preserve spacing, Json that has been read in from a file will be written with the same formatting. In other words, the carriage returns and white space are captured during the parsing process and used to re-format the output during the write process.
+
+### Flex Mode
+
+When in flex mode, the FlexJson library has the following features:
+
+- Like JavaScript, comments can be surrounded by /* (start of comment) and */ (end of comment)
+
+- Like Javasrcipt, when a "//" is encountered, the remainder of the line is considered to be a comment
+
+- Strings do not require quotes unless they contain special characters
+
+- Strings can be quoted using double quotes or single quotes
+  
+When in flex mode, all of the following examples of Json are valid:
+
+__example 1:__
+
+```javascript
+{apple: red, banana: yellow, 'sky': 'blue'}
+```
+
+__example 2:__
+
+```javascript
+{"apple": "red"
+ ,'banana': 'yellow'
+ // ,'sky': 'blue'  - this line is commented out
+}
+```
+
+__example 3:__
+
+```javascript
+[ "one, is first"
+  ,'two, is next'
+  /* comment out remainder of array
+  ,"three, is third"
+  ,'four', is last"
+  */
+]
+```
+
+__Note__ that {number:"2"} is not the same as {number:2} because FlexJson will see that the 2 without quotes is a valid number and load it as a numeric.
 
 ### Contributing
 
