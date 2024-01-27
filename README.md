@@ -167,12 +167,12 @@ __Note__ that {number:"2"} is not the same as {number:2} because FlexJson will s
 
 If you like this project, You can support us with starring ⭐ this repository or donate to [uO.heartofkenya.com](https://u0.heartofkenya.com/).
 
+### Acknowledgements
+
+Special thanks to [u0.heartofKenya.com](https://u0.heartofkenya.com/) and [ebiashararahisi](https://ebiashararahisi.com/) for their work in Machakos, Kenya.
+
 ### License
 
 [MIT](LICENSE.txt)
 
 Made with 💙
-
-### Acknowledgements
-
-Special thanks to [u0.heartofKenya.com](https://u0.heartofkenya.com/) and [ebiashararahisi](https://ebiashararahisi.com/) for their work in Machakos, Kenya.
