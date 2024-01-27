@@ -17,7 +17,7 @@
 npm install flex-json
 
 #PNPM
-pnpm isntall flex-json
+pnpm install flex-json
 
 # Yarn
 Yarn install flex-json
@@ -103,6 +103,7 @@ It is simply Json with comments! FlexJson was written to make JSON config files 
 ## How the library works
 
 ### Flex-json syntax
+
 BTW FlexJson as a standard of syntax is not really all that new - it is very much in existence within JavaScript and other syntax standards. Here we just make it available in a library and to facilitate config file parsing and editing.
 
 ### Strict Mode

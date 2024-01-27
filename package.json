@@ -11,6 +11,9 @@
     "JSON Object Array",
     "flexjson"
   ],
+  "dependencies": {
+    "string-builder": "^0.1.8"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tedtyree/FlexJson.git"
