@@ -9,7 +9,6 @@
 - [Why flex-json](#why-flex-json)
 - [How the library works](#how-the-library-works)
 
-
 ## Install
 
 ```bash
@@ -27,7 +26,7 @@ Yarn install flex-json
 ## Usage
 
 ```javascript
-const { FlexJson } = require('flex-json');
+const  FlexJson  = require('flex-json');
 
 // Create a FlexJson object
 const myJson = new FlexJson('{"key": "value"}', true);
@@ -73,7 +72,7 @@ console.log(myJson.getBool('flag', false)); // Get boolean value by key with a d
 Serialization and Deserialization examples
 
 ```javascript
-import { FlexJson } from 'npm-package-template';
+const FlexJson = require("flex-json");
 
 // Create an instance of FlexJson
 const flexJson = new FlexJson();
@@ -86,7 +85,7 @@ flexJson.Deserialize(jsonString);
 flexJson.SerializeMe();
 
 // Access serialized JSON string
-const serializedJson = flexJson.getSerializedJson();
+const serializedJson = flexJson.SerializeMe();
 console.log(serializedJson);
 ```
 
@@ -166,10 +165,14 @@ __Note__ that {number:"2"} is not the same as {number:2} because FlexJson will s
 
 ### Support
 
-If you like this project, You can support us with starring ⭐ this repository.
+If you like this project, You can support us with starring ⭐ this repository or donate to [uO.heartofkenya.com](https://u0.heartofkenya.com/).
 
 ### License
 
 [MIT](LICENSE.txt)
 
 Made with 💙
+
+### Acknowledgements
+
+Special thanks to [u0.heartofKenya.com](https://u0.heartofkenya.com/) and [ebiashararahisi](https://ebiashararahisi.com/) for their work in Machakos, Kenya.
