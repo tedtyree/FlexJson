@@ -3,6 +3,7 @@ const FlexJsonPosition = require("./FlexJsonPosition.js");
 const FlexJsonMeta = require("./FlexJsonMeta.js");
 const fs = require("fs");
 const StringBuilder = require("string-builder");
+const { trackingStats } = require( "./get/index.js");
 
 class FlexJson {
   _status = 0;
@@ -40,11 +41,17 @@ class FlexJson {
     }
   }
 
+  // get trackingStats() {
+  //   if (this._meta == null) return false;
+  //   if (this._meta.stats == null) return false;
+  //   return true;
+  // }
+  // use the imported trackingStats function instead
+
   get trackingStats() {
-    if (this._meta == null) return false;
-    if (this._meta.stats == null) return false;
-    return true;
+    return trackingStats(this._meta);
   }
+
 
   get statusMsg() {
     if (this._meta != null) {
