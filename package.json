@@ -9,7 +9,7 @@
     "JSON Object",
     "JSON Array",
     "JSON Object Array",
-    "flexjson"
+    "flex-json"
   ],
   "dependencies": {
     "string-builder": "^0.1.8"

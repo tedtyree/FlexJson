@@ -344,7 +344,7 @@ class FlexJson {
   v(idx, dotNotation = true) {
     //if (trackingStats) { IncStats("stat_Value_get"); } // FUTURE-NEW
     if (!idx) {
-      // retun the value of this item
+      // return the value of this item
       if (!this.ValidateValue()) {
         return null;
       } // *** Unable to validate/Deserialize the value
@@ -356,7 +356,6 @@ class FlexJson {
     } else {
       return this.i(idx, dotNotation).v();
     }
-    return null;
   }
 
   get thisValue() {
@@ -383,7 +382,7 @@ class FlexJson {
   toJsonArray(idx, dotNotation = true) {
     //if (trackingStats) { IncStats("stat_Value_get"); } // FUTURE-NEW
     if (!idx) {
-      // retun the value of this item
+      // return the value of this item
       if (!this.ValidateValue()) {
         return null;
       } // *** Unable to validate/Deserialize the value
@@ -1727,22 +1726,21 @@ class FlexJson {
       case "bigint":
       case "number":
         return "number";
-        break;
+
       case "boolean":
         return "boolean";
-        break;
+
       case "object": // must be FlexJson object or it is not a true "object"
         return ""; // indicates an error/invlid type
-        break;
+
       case "FlexJson":
         return FlexJson.jsonType;
-        break;
+
       case "function":
         return ""; // indicate error/invalid type
-        break;
+
       default:
         return "string";
-        break;
     }
   }
 }
