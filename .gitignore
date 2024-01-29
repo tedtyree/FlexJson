@@ -2,7 +2,7 @@
 .idea
 .tscache
 .DS_Store
-node_modules/
+node_modules
 coverage/
 sauce_connect.log
 backup/
