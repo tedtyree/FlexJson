@@ -1,4 +1,4 @@
-# FlexJson
+# flex-json
 
 ## Flexible JSON manipulation library for JavaScript.
 
@@ -97,27 +97,27 @@ It is simply Json with comments! FlexJson was written to make JSON config files 
 - Includes comments in both /* */ and // notation
 - Simple to edit Json files
 - Allows for other JavaScript like features such as using either single quotes or double quotes.
-- Can also be used within Node.js apps for other uses such as reading/writing JSON to/from database records and parsing loosely formattted Json in web page content.
+- Can also be used within Node.js apps for other uses such as reading/writing JSON to/from database records and parsing loosely formatted Json in web page content.
 
 ## How the library works
 
 ### Flex-json syntax
 
-BTW FlexJson as a standard of syntax is not really all that new - it is very much in existence within JavaScript and other syntax standards. Here we just make it available in a library and to facilitate config file parsing and editing.
+BTW flex-json as a standard of syntax is not really all that new - it is very much in existence within JavaScript and other syntax standards. Here we just make it available in a library and to facilitate config file parsing and editing.
 
 ### Strict Mode
 
-When in strict mode, the FlexJson library reads JSON files in standard JSON format. Comments are not valid and double quotes are required around strings.
+When in strict mode, the flex-json library reads JSON files in standard JSON format. Comments are not valid and double quotes are required around strings.
 
 Note: If the library is flagged to preserve spacing, Json that has been read in from a file will be written with the same formatting. In other words, the carriage returns and white space are captured during the parsing process and used to re-format the output during the write process.
 
 ### Flex Mode
 
-When in flex mode, the FlexJson library has the following features:
+When in flex mode, the flex-json library has the following features:
 
-- Like JavaScript, comments can be surrounded by /* (start of comment) and */ (end of comment)
+- Like JavaScript, comments can be surrounded by  /* (start of comment) and */ (end of comment)
 
-- Like Javasrcipt, when a "//" is encountered, the remainder of the line is considered to be a comment
+- Like JavaScript, when a  "//" is encountered, the remainder of the line is considered to be a comment
 
 - Strings do not require quotes unless they contain special characters
 
@@ -152,7 +152,7 @@ __example 3:__
 ]
 ```
 
-__Note__ that {number:"2"} is not the same as {number:2} because FlexJson will see that the 2 without quotes is a valid number and load it as a numeric.
+__Note__ that {number:"2"} is not the same as {number:2} because flex-json will see that the 2 without quotes is a valid number and load it as a numeric.
 
 ### Contributing
 
