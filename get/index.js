@@ -5,9 +5,6 @@ function trackingStats(meta) {
   return true;
 }
 
-
-
-
 // exports
 module.exports = {
   trackingStats: trackingStats
