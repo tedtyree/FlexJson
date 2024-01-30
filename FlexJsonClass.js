@@ -3,7 +3,7 @@ const FlexJsonPosition = require("./FlexJsonPosition.js");
 const FlexJsonMeta = require("./FlexJsonMeta.js");
 const fs = require("fs");
 const StringBuilder = require("string-builder");
-const { trackingStats } = require( "./get/index.js");
+const { trackingStats, statusMsg,tmpStatusMsg } = require( "./get/index.js");
 
 class FlexJson {
   _status = 0;
@@ -54,12 +54,13 @@ class FlexJson {
 
 
   get statusMsg() {
-    if (this._meta != null) {
-      if (this._meta.statusMsg != null) {
-        return this._meta.statusMsg;
-      }
-    }
-    return "";
+    // if (this._meta != null) {
+    //   if (this._meta.statusMsg != null) {
+    //     return this._meta.statusMsg;
+    //   }
+    // }
+    // return "";
+    return statusMsg(this._meta);
   }
   set statusMsg(value) {
     if (this.NoStatsOrMsgs) {
@@ -77,12 +78,13 @@ class FlexJson {
   }
 
   get tmpStatusMsg() {
-    if (this._meta != null) {
-      if (this._meta.tmpStatusMsg != null) {
-        return this._meta.tmpStatusMsg;
-      }
-    }
-    return "";
+    // if (this._meta != null) {
+    //   if (this._meta.tmpStatusMsg != null) {
+    //     return this._meta.tmpStatusMsg;
+    //   }
+    // }
+    // return "";
+    return tmpStatusMsg(this._meta);
   }
   set tmpStatusMsg(value) {
     this.createMetaIfNeeded();

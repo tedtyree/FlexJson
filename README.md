@@ -1,6 +1,13 @@
 # flex-json
 
-## Flexible JSON manipulation library for JavaScript.
+## Flexible JSON manipulation library for JavaScript
+
+## Maintainers
+
+| Maintainer      | GitHub                                      | LinkedIn                                               |
+| --------------- | ------------------------------------------- | ------------------------------------------------------ |
+| Ted Tyree       | [GitHub](https://github.com/tedtyree)       |[LinkedIn](https://www.linkedin.com/in/tedtyree/)       |  
+| Michael Njuguna | [GitHub](https://github.com/michaelnjuguna) |[LinkedIn](https://www.linkedin.com/in/michael-njuguna/)|
 
 ## Table of Contents
 
