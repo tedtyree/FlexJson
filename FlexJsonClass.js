@@ -43,14 +43,14 @@ class FlexJson {
 
 
   get trackingStats() {
-    if (meta == null || meta.status == null) {
+    if (this._meta == null || this._meta.status == null) {
       return false;
     }
     return true;
   }
 
   get statusMsg() {
-    if (meta != null && meta.statusMsg != null) {
+    if (this._meta != null && this._meta.statusMsg != null) {
       return meta.statusMsg;
     }
     return "";
