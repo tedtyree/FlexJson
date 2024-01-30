@@ -11,10 +11,75 @@
 
 ## Table of Contents
 
-- [Install](#install)
-- [Usage](#usage)
 - [Why flex-json](#why-flex-json)
 - [How the library works](#how-the-library-works)
+- [Install](#install)
+- [Usage](#usage)
+
+## Why flex-json
+
+It is simply Json with comments! FlexJson was written to make JSON config files easy to manage and allow for comments. The library also makes it super easy to read a json file (often a config file), modify a single value, and save the file back to the file system without messing up the comments.
+
+- Easy config file formatting
+- Includes comments in both /* */ and // notation
+- Simple to edit Json files
+- Allows for other JavaScript like features such as using either single quotes or double quotes.
+- Can also be used within Node.js apps for other uses such as reading/writing JSON to/from database records and parsing loosely formatted Json in web page content.
+
+## How the library works
+
+### Flex-json syntax
+
+BTW flex-json as a standard of syntax is not really all that new - it is very much in existence within JavaScript and other syntax standards. Here we just make it available in a library and to facilitate config file parsing and editing.
+
+### Strict Mode
+
+When in strict mode, the flex-json library reads JSON files in standard JSON format. Comments are not valid and double quotes are required around strings.
+
+Note: If the library is flagged to preserve spacing, Json that has been read in from a file will be written with the same formatting. In other words, the carriage returns and white space are captured during the parsing process and used to re-format the output during the write process.
+
+### Flex Mode
+
+When in flex mode, the flex-json library has the following features:
+
+- Like JavaScript, comments can be surrounded by  /* (start of comment) and */ (end of comment)
+
+- Like JavaScript, when a  "//" is encountered, the remainder of the line is considered to be a comment
+
+- Strings do not require quotes unless they contain special characters
+
+- Strings can be quoted using double quotes or single quotes
+  
+When in flex mode, all of the following examples of Json are valid:
+
+__example 1:__
+
+```javascript
+{apple: red, banana: yellow, 'sky': 'blue'}
+```
+
+__example 2:__
+
+```javascript
+{"apple": "red"
+ ,'banana': 'yellow'
+ // ,'sky': 'blue'  - this line is commented out
+}
+```
+
+__example 3:__
+
+```javascript
+[ "one, is first"
+  ,'two, is next'
+  /* comment out remainder of array
+  ,"three, is third"
+  ,'four', is last"
+  */
+]
+```
+
+__Note__ that {number:"2"} is not the same as {number:2} because flex-json will see that the 2 without quotes is a valid number and load it as a numeric.
 
 ## Install
 
@@ -96,70 +161,46 @@ const serializedJson = flexJson.SerializeMe();
 console.log(serializedJson);
 ```
 
-## Why flex-json
+Config file example (this is the best part!)
 
-It is simply Json with comments! FlexJson was written to make JSON config files easy to manage and allow for comments. The library also makes it super easy to read a json file (often a config file), modify a single value, and save the file back to the file system without messing up the comments.
-
-- Easy config file formatting
-- Includes comments in both /* */ and // notation
-- Simple to edit Json files
-- Allows for other JavaScript like features such as using either single quotes or double quotes.
-- Can also be used within Node.js apps for other uses such as reading/writing JSON to/from database records and parsing loosely formatted Json in web page content.
-
-## How the library works
-
-### Flex-json syntax
-
-BTW flex-json as a standard of syntax is not really all that new - it is very much in existence within JavaScript and other syntax standards. Here we just make it available in a library and to facilitate config file parsing and editing.
-
-### Strict Mode
-
-When in strict mode, the flex-json library reads JSON files in standard JSON format. Comments are not valid and double quotes are required around strings.
-
-Note: If the library is flagged to preserve spacing, Json that has been read in from a file will be written with the same formatting. In other words, the carriage returns and white space are captured during the parsing process and used to re-format the output during the write process.
-
-### Flex Mode
-
-When in flex mode, the flex-json library has the following features:
-
-- Like JavaScript, comments can be surrounded by  /* (start of comment) and */ (end of comment)
-
-- Like JavaScript, when a  "//" is encountered, the remainder of the line is considered to be a comment
-
-- Strings do not require quotes unless they contain special characters
-
-- Strings can be quoted using double quotes or single quotes
-  
-When in flex mode, all of the following examples of Json are valid:
-
-__example 1:__
-
+First create a json config file for example a text file c:/temp/my-config.json containing the following text…
 ```javascript
-{apple: red, banana: yellow, 'sky': 'blue'}
-```
-
-__example 2:__
-
-```javascript
-{"apple": "red"
- ,'banana': 'yellow'
- // ,'sky': 'blue'  - this line is commented out
+/* my-config
+** this is an example of parsing
+** and updating a json config file
+*/
+{
+ParameterA: 'Apple',
+ParameterB:'Banana'
 }
 ```
 
-__example 3:__
+In your node.js app run these commands…
 
 ```javascript
-[ "one, is first"
-  ,'two, is next'
-  /* comment out remainder of array
-  ,"three, is third"
-  ,'four', is last"
-  */
-]
+// setup parameters
+let defaultCounter = 0;
+let myConfigPath = "c:/temp/my-config.json";
+
+// read json config file
+let myConfig = new FlexJson();
+myConfig.DeserializeFlexFile(myConfigPath);
+
+// read CounterA and increment it by 1
+// use default value to create CounterA if it does not exist
+let counter = myConfig.getNum("CounterA",defaultCounter);
+counter = counter + 1;
+myConfig.add(counter,"CounterA");
+
+// write config file back to file system
+myConfig.WriteToFile(myConfigPath);
 ```
 
-__Note__ that {number:"2"} is not the same as {number:2} because flex-json will see that the 2 without quotes is a valid number and load it as a numeric.
+The first time this is run the output my-config.json will have a new parameter…
+CounterA:1
+
+And each new time this is run the counter will increase…
+CounterA:2
 
 ### Contributing
 
