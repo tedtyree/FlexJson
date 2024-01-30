@@ -3,7 +3,7 @@ const FlexJsonPosition = require("./FlexJsonPosition.js");
 const FlexJsonMeta = require("./FlexJsonMeta.js");
 const fs = require("fs");
 const StringBuilder = require("string-builder");
-const { trackingStats, statusMsg,tmpStatusMsg } = require( "./get/index.js");
+
 
 class FlexJson {
   _status = 0;
@@ -41,26 +41,19 @@ class FlexJson {
     }
   }
 
-  // get trackingStats() {
-  //   if (this._meta == null) return false;
-  //   if (this._meta.stats == null) return false;
-  //   return true;
-  // }
-  // use the imported trackingStats function instead
 
   get trackingStats() {
-    return trackingStats(this._meta);
+    if (this._meta == null || this._meta.status == null) {
+      return false;
+    }
+    return true;
   }
 
-
   get statusMsg() {
-    // if (this._meta != null) {
-    //   if (this._meta.statusMsg != null) {
-    //     return this._meta.statusMsg;
-    //   }
-    // }
-    // return "";
-    return statusMsg(this._meta || "");
+    if (this._meta != null && this._meta.statusMsg != null) {
+      return meta.statusMsg;
+    }
+    return "";
   }
   set statusMsg(value) {
     if (this.NoStatsOrMsgs) {
@@ -78,18 +71,15 @@ class FlexJson {
   }
 
   get tmpStatusMsg() {
-    // if (this._meta != null) {
-    //   if (this._meta.tmpStatusMsg != null) {
-    //     return this._meta.tmpStatusMsg;
-    //   }
-    // }
-    // return "";
-    return tmpStatusMsg(this._meta || "");
+    if (this._meta && this._meta.tmpStatusMsg) {
+      return this._meta.tmpStatusMsg;
+    }
+    return "";
   }
   set tmpStatusMsg(value) {
     this.createMetaIfNeeded();
-    if (_meta != null) {
-      _meta.tmpStatusMsg = value;
+    if (this._meta) {
+      this._meta.tmpStatusMsg = value;
     }
   }
 
@@ -107,7 +97,7 @@ class FlexJson {
     //    return this._meta.preSpace;
     //  }
     //}
-    return (this._meta && this._meta.preSpace)?this._meta.preSpace:null;
+    return this._meta && this._meta.preSpace ? this._meta.preSpace : null;
   }
 
   set preSpace(value) {
@@ -123,7 +113,7 @@ class FlexJson {
     //    return this._meta.postSpace;
     //  }
     //}
-    return (this._meta && this._meta.postSpace)?this._meta.postSpace:null;
+    return this._meta && this._meta.postSpace ? this._meta.postSpace : null;
   }
 
   set postSpace(value) {
@@ -1364,9 +1354,15 @@ class FlexJson {
 
   CreatePartClone(keepSP = false, keepCM = false) {
     let jClone = new FlexJson();
-    if(this.UseFlexJson) { jClone.UseFlexJson = true; }
-    if (keepSP) { jClone.keepSpacing = true; }
-    if (keepCM) { jClone.keepComments = true; }
+    if (this.UseFlexJson) {
+      jClone.UseFlexJson = true;
+    }
+    if (keepSP) {
+      jClone.keepSpacing = true;
+    }
+    if (keepCM) {
+      jClone.keepComments = true;
+    }
     jClone.ALLOW_SINGLE_QUOTE_STRINGS = this.ALLOW_SINGLE_QUOTE_STRINGS;
     return jClone;
   }
@@ -1511,8 +1507,12 @@ class FlexJson {
           // *** For all cases: object, array, string, number, boolean, or null
           jNew.Parent = this;
           jNew._key = Key;
-          if (preKey) { jNew.preKey = preKey; }
-          if (postKey) { jNew.postKey = postKey; }
+          if (preKey) {
+            jNew.preKey = preKey;
+          }
+          if (postKey) {
+            jNew.postKey = postKey;
+          }
           v.push(jNew); // FUTURE: IS THIS WRONG? SHOULD WE CHECK TO SEE IF THE KEY ALREADY EXISTS? AS IS, THE FIRST VALUE WILL "overshadow" ANY SUBSEQUENT VALUE. MAYBE THIS IS OK.
           mePos = finalPos;
         }
@@ -1706,19 +1706,18 @@ class FlexJson {
   // WriteToFile()
   // If object is setup as FlexJSON and with KeepSpacing/KeepComments, then file will be written accordingly
   // Return: 0=ok, -1=error, -2=could not write because of invalid FlexJson object
-  WriteToFile(FilePath)
-  {
-      try
-      {
-          let outString = this.jsonString;
-          if (this._status == 0)
-          {
-              fs.writeFileSync(FilePath, outString, {encoding: "utf8"});
-          }
-          else { return -2; }
+  WriteToFile(FilePath) {
+    try {
+      let outString = this.jsonString;
+      if (this._status == 0) {
+        fs.writeFileSync(FilePath, outString, { encoding: "utf8" });
+      } else {
+        return -2;
       }
-      catch { return -1; }
-      return 0;
+    } catch {
+      return -1;
+    }
+    return 0;
   }
 
   StatusErr(nErr, strErr) {
