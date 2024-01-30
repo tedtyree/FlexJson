@@ -1,4 +1,4 @@
-const FlexJson = require("./FlexJsonClass.js");
+const FlexJson = require("../FlexJsonClass.js");
 // Test case 1: Creating a new FlexJson object
 const flexJson1 = new FlexJson();
 console.log(flexJson1.jsonString); // Output: ""
