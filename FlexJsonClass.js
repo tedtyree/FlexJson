@@ -36,8 +36,8 @@ class FlexJson {
     if (this._NoStatsOrMsgs && !force) {
       return;
     } // Do not track stats/message/meta-data
-    if (this._meta == null) {
-      this._meta = new FlexJsonMeta();
+    if (!this._meta) {
+      this._meta = {};
     }
   }
 
@@ -60,7 +60,7 @@ class FlexJson {
     //   }
     // }
     // return "";
-    return statusMsg(this._meta);
+    return statusMsg(this._meta || "");
   }
   set statusMsg(value) {
     if (this.NoStatsOrMsgs) {
@@ -84,7 +84,7 @@ class FlexJson {
     //   }
     // }
     // return "";
-    return tmpStatusMsg(this._meta);
+    return tmpStatusMsg(this._meta || "");
   }
   set tmpStatusMsg(value) {
     this.createMetaIfNeeded();
@@ -98,16 +98,16 @@ class FlexJson {
   }
 
   set key(value) {
-    this._key = value + "";
+    this._key = "" + value; // convert to string (future: allow numeric key?)
   }
 
   get preSpace() {
-    if (this._meta != null) {
-      if (this._meta.preSpace != null) {
-        return this._meta.preSpace;
-      }
-    }
-    return null;
+    //if (this._meta != null) {
+    //  if (this._meta.preSpace != null) {
+    //    return this._meta.preSpace;
+    //  }
+    //}
+    return (this._meta && this._meta.preSpace)?this._meta.preSpace:null;
   }
 
   set preSpace(value) {
@@ -118,12 +118,12 @@ class FlexJson {
   }
 
   get postSpace() {
-    if (this._meta != null) {
-      if (this._meta.postSpace != null) {
-        return this._meta.postSpace;
-      }
-    }
-    return null;
+    //if (this._meta != null) {
+    //  if (this._meta.postSpace != null) {
+    //    return this._meta.postSpace;
+    //  }
+    //}
+    return (this._meta && this._meta.postSpace)?this._meta.postSpace:null;
   }
 
   set postSpace(value) {
@@ -183,7 +183,7 @@ class FlexJson {
 
   get keepSpacing() {
     if (this._meta != null) {
-      return this._meta.keepSpacing;
+      return this._meta.keepSpacing || false;
     }
     return false;
   }
@@ -196,7 +196,7 @@ class FlexJson {
 
   get keepComments() {
     if (this._meta != null) {
-      return this._meta.keepComments;
+      return this._meta.keepComments || false;
     }
     return false;
   }
@@ -486,7 +486,6 @@ class FlexJson {
   forEach(callback) {
     if (this.jsonType == "object" || this.jsonType == "array") {
       for (let i = 0; i < this.length; i++) {
-        let jj = this.i(i); // debugger
         callback(this.i(i));
       } // end for
     } else {
@@ -502,11 +501,6 @@ class FlexJson {
 
   add(value, idx = "", dotNotation = true) {
     var newV;
-    var debugType = typeof value; /// debug debug debug
-    if (value === null) {
-      /// debug debug debug
-      console.log("is null");
-    }
     if (
       value !== null &&
       typeof value === "object" &&
@@ -712,9 +706,6 @@ class FlexJson {
           this._value.forEach((o) => {
             if (i > 0) {
               s.append(",");
-            }
-            if (o.key == "data") {
-              console.log("debug here111"); // debug debug debug
             }
             let k = o.SerializeMe();
 
@@ -1007,7 +998,7 @@ class FlexJson {
           // if we are no longer in pre-space territory, the we need to store the whitespace/comments
           if (meStatus >= FlexJsonConstants.ST_STRING) {
             if (keepCM || keepSP) {
-              preSpace = getSpace;
+              this.preSpace = getSpace;
               getSpace = ""; // clear
             }
           }
@@ -1373,7 +1364,9 @@ class FlexJson {
 
   CreatePartClone(keepSP = false, keepCM = false) {
     let jClone = new FlexJson();
-    jClone.UseFlexJson = this.UseFlexJson;
+    if(this.UseFlexJson) { jClone.UseFlexJson = true; }
+    if (keepSP) { jClone.keepSpacing = true; }
+    if (keepCM) { jClone.keepComments = true; }
     jClone.ALLOW_SINGLE_QUOTE_STRINGS = this.ALLOW_SINGLE_QUOTE_STRINGS;
     return jClone;
   }
@@ -1382,6 +1375,8 @@ class FlexJson {
     var j2;
     var jNew;
     let Key = "";
+    let preKey = "";
+    let postKey = "";
     var c;
 
     let v = [];
@@ -1448,8 +1443,8 @@ class FlexJson {
       } else {
         // capture the white space/comments here
         if (keepCM || keepSP) {
-          this.preKey = j2.preSpace;
-          this.postKey = j2.finalSpace;
+          preKey = j2.preSpace;
+          postKey = j2.finalSpace;
         }
         Key = j2._value; // already verified that this is type "string"
         this._keyQuote = j2._stringQuote;
@@ -1516,6 +1511,8 @@ class FlexJson {
           // *** For all cases: object, array, string, number, boolean, or null
           jNew.Parent = this;
           jNew._key = Key;
+          if (preKey) { jNew.preKey = preKey; }
+          if (postKey) { jNew.postKey = postKey; }
           v.push(jNew); // FUTURE: IS THIS WRONG? SHOULD WE CHECK TO SEE IF THE KEY ALREADY EXISTS? AS IS, THE FIRST VALUE WILL "overshadow" ANY SUBSEQUENT VALUE. MAYBE THIS IS OK.
           mePos = finalPos;
         }
@@ -1696,14 +1693,32 @@ class FlexJson {
   DeserializeFlexFile(
     FilePath,
     OkToClip = false,
-    spacing_flag = -1,
-    comments_flag = -1
+    spacing_flag = 1, // default = keep spacing & comments
+    comments_flag = 1
   ) {
     this.UseFlexJson = true;
     if (spacing_flag >= 0 || comments_flag >= 0) {
       this.keepSpacingAndComments(spacing_flag, comments_flag);
     }
     return this.DeserializeFile(FilePath, OkToClip);
+  }
+
+  // WriteToFile()
+  // If object is setup as FlexJSON and with KeepSpacing/KeepComments, then file will be written accordingly
+  // Return: 0=ok, -1=error, -2=could not write because of invalid FlexJson object
+  WriteToFile(FilePath)
+  {
+      try
+      {
+          let outString = this.jsonString;
+          if (this._status == 0)
+          {
+              fs.writeFileSync(FilePath, outString, {encoding: "utf8"});
+          }
+          else { return -2; }
+      }
+      catch { return -1; }
+      return 0;
   }
 
   StatusErr(nErr, strErr) {
