@@ -223,4 +223,3 @@ Special thanks to [u0.heartofKenya.com](https://u0.heartofkenya.com/) and [ebias
 
 [MIT](LICENSE.txt)
 
-Made with 💙
