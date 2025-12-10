@@ -308,6 +308,10 @@ The Tree-sitter grammar in `extensions/tree-sitter-jfx/` can be used with any ed
 5. Push your code to your fork repository.
 6. Create pull request.
 
+### Backlog
+- Improve code structure
+- Add support for """ and ''' multi-line quotes
+
 ### Support
 
 If you like this project, You can support us with starring ⭐ this repository or donate to [uO.heartofkenya.com](https://u0.heartofkenya.com/).
