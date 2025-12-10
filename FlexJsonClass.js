@@ -1,19 +1,49 @@
+/**
+ * FlexJson - Flexible JSON Parser and Manipulator
+ * 
+ * A JSON library that supports:
+ * - Comments (both // line and block comments)
+ * - Single-quoted, double-quoted, and unquoted strings
+ * - Trailing commas
+ * - Whitespace/comment preservation for round-trip editing
+ * 
+ * @module FlexJson
+ * @see https://github.com/tedtyree/FlexJson
+ */
+
 const FlexJsonConstants = require("./FlexJsonConstants.js");
 const FlexJsonPosition = require("./FlexJsonPosition.js");
 const FlexJsonMeta = require("./FlexJsonMeta.js");
 const fs = require("fs");
 
-// Helper function to check if a string is exactly 4 valid hex characters
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Check if a string is exactly 4 valid hexadecimal characters
+ * Used for validating \uXXXX unicode escape sequences
+ * @param {string} str - The string to check
+ * @returns {boolean} True if valid 4-digit hex
+ */
 function IsHex4(str) {
   if (str == null || str.length !== 4) return false;
   return /^[0-9A-Fa-f]{4}$/.test(str);
 }
 
+// ============================================================================
+// FlexJsonError Class
+// ============================================================================
+
 /**
- * Custom error class for FlexJson errors
- * Includes status code and message for programmatic error handling
+ * Custom error class for FlexJson parsing and serialization errors
+ * @extends Error
  */
 class FlexJsonError extends Error {
+  /**
+   * @param {number} status - Negative error code
+   * @param {string} message - Human-readable error description
+   */
   constructor(status, message) {
     super(message);
     this.name = "FlexJsonError";
@@ -21,25 +51,53 @@ class FlexJsonError extends Error {
   }
 }
 
+// ============================================================================
+// FlexJson Class
+// ============================================================================
+
+/**
+ * FlexJson - A flexible JSON node that can represent objects, arrays, or primitives
+ * Each node maintains its own type, value, and optional formatting metadata
+ */
 class FlexJson {
-  _status = 0;
-  _jsonType = "";
-  _key = null;
-  _value = null;
-  _value_valid = false;
-  _jsonString = "";
-  _jsonString_valid = false;
+  // ---------------------------------------------------------------------------
+  // Core Properties
+  // ---------------------------------------------------------------------------
+  
+  _status = 0;              // 0 = OK, negative = error
+  _jsonType = "";           // "object", "array", "string", "number", "boolean", "null"
+  _key = null;              // Key name (for items within an object)
+  _value = null;            // The actual value (primitive or array of FlexJson children)
+  _value_valid = false;     // Whether _value has been set
+  _jsonString = "";         // Serialized JSON string cache
+  _jsonString_valid = false; // Whether _jsonString is up-to-date
 
-  Parent;
-  ALLOW_SINGLE_QUOTE_STRINGS = true;
-  ENCODE_SINGLE_QUOTES = false;
+  // ---------------------------------------------------------------------------
+  // Configuration Properties
+  // ---------------------------------------------------------------------------
+  
+  Parent;                           // Reference to parent FlexJson node
+  ALLOW_SINGLE_QUOTE_STRINGS = true; // Allow 'single quoted' strings
+  ENCODE_SINGLE_QUOTES = false;      // Encode ' as \' when serializing
+  _UseFlexJson = false;              // Enable flex mode (comments, unquoted strings)
+  _throwOnError = true;              // Throw FlexJsonError on errors (false = silent)
 
-  _UseFlexJson = false;
-  _throwOnError = true; // Default: throw errors (set to false for silent mode)
+  // ---------------------------------------------------------------------------
+  // Metadata Properties
+  // ---------------------------------------------------------------------------
+  
+  _meta = null;         // Stores spacing, comments, and status messages
+  _NoStatsOrMsgs = false; // Disable metadata tracking for performance
 
-  _meta = null;
-  _NoStatsOrMsgs = false;
+  // ---------------------------------------------------------------------------
+  // Constructor
+  // ---------------------------------------------------------------------------
 
+  /**
+   * Create a new FlexJson instance
+   * @param {string} [InitialJSON] - Optional JSON string to parse immediately
+   * @param {boolean} [UseFlexJsonFlag] - Enable flex mode for parsing
+   */
   constructor(InitialJSON, UseFlexJsonFlag) {
     if (UseFlexJsonFlag == true || UseFlexJsonFlag == false) {
       this.UseFlexJson = UseFlexJsonFlag;
@@ -49,20 +107,26 @@ class FlexJson {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Internal Helper Methods
+  // ---------------------------------------------------------------------------
+
+  /** Initialize metadata object if not already created */
   createMetaIfNeeded(force = false) {
     if (this._NoStatsOrMsgs && !force) {
       return;
-    } // Do not track stats/message/meta-data
+    }
     if (!this._meta) {
       this._meta = {};
     }
   }
 
-  // Helper methods for meta property access (reduces repetitive getter/setter code)
+  /** Get a metadata property with optional default value */
   _getMetaProp(name, defaultVal = null) {
     return this._meta && this._meta[name] != null ? this._meta[name] : defaultVal;
   }
 
+  /** Set a metadata property (creates meta object if needed) */
   _setMetaProp(name, value) {
     this.createMetaIfNeeded();
     if (this._meta) {
@@ -70,6 +134,9 @@ class FlexJson {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Status and Error Properties
+  // ---------------------------------------------------------------------------
 
   get trackingStats() {
     if (this._meta == null || this._meta.status == null) {
@@ -126,6 +193,10 @@ class FlexJson {
   get postSpace() { return this._getMetaProp("postSpace"); }
   set postSpace(value) { this._setMetaProp("postSpace", value); }
 
+  // ---------------------------------------------------------------------------
+  // Whitespace/Comment Preservation Properties (for round-trip editing)
+  // ---------------------------------------------------------------------------
+
   get finalSpace() { return this._getMetaProp("finalSpace"); }
   set finalSpace(value) { this._setMetaProp("finalSpace", value); }
 
@@ -135,20 +206,28 @@ class FlexJson {
   get postKey() { return this._getMetaProp("postKey"); }
   set postKey(value) { this._setMetaProp("postKey", value); }
 
+  /** Preserve whitespace when deserializing */
   get keepSpacing() { return this._getMetaProp("keepSpacing", false); }
   set keepSpacing(value) { this._setMetaProp("keepSpacing", value); }
 
+  /** Preserve comments when deserializing */
   get keepComments() { return this._getMetaProp("keepComments", false); }
   set keepComments(value) { this._setMetaProp("keepComments", value); }
 
+  // ---------------------------------------------------------------------------
+  // Mode Configuration Properties
+  // ---------------------------------------------------------------------------
+
+  /** Enable flex mode (comments, unquoted strings, single quotes) */
   get UseFlexJson() {
     return this._UseFlexJson;
   }
   set UseFlexJson(value) {
     this._UseFlexJson = value;
-    this.InvalidateJsonString(1); // If we switch to FlexJson then all our stored JSON strings could be incorrect.
+    this.InvalidateJsonString(1);
   }
 
+  /** If true (default), throw FlexJsonError on errors. If false, use silent mode. */
   get throwOnError() {
     return this._throwOnError;
   }
@@ -156,19 +235,25 @@ class FlexJson {
     this._throwOnError = value === true;
   }
 
+  // ---------------------------------------------------------------------------
+  // Core Getters
+  // ---------------------------------------------------------------------------
+
+  /** Error status: 0 = OK, negative = error */
   get Status() {
     return this._status;
-  } // End Property
+  }
 
+  /** JSON type: "object", "array", "string", "number", "boolean", or "null" */
   get jsonType() {
     return this._jsonType;
   }
 
+  /** Serialized JSON string (triggers serialization if needed) */
   get jsonString() {
-    // if (trackingStats) { IncStats("stat_jsonString_get"); }
     if (this._status != 0) {
       return "";
-    } // *** ERROR - status is invalid
+    }
     if (!this._jsonString_valid) {
       if (!this._value_valid) {
         // *** Neither is valid - this JSON object is null
@@ -604,10 +689,16 @@ class FlexJson {
     return this.parseBoolean(this._value);
   }
 
+  /** Parse a value as boolean (handles string "false", "False", "FALSE") */
   parseBoolean(v) {
     return !v || v === "false" || v === "False" || v === "FALSE" ? false : true;
   }
 
+  // ---------------------------------------------------------------------------
+  // Static Factory Methods
+  // ---------------------------------------------------------------------------
+
+  /** Create a FlexJson node representing null */
   static CreateNull() {
     let j = new FlexJson();
     j._value = null;
@@ -619,8 +710,15 @@ class FlexJson {
     return j;
   }
 
-  // SerializeMe() - Use this to Serialize the items that are already in the FlexJson object.
-  // Return: 0=OK, -1=Error
+  // ---------------------------------------------------------------------------
+  // Serialization Methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Serialize this FlexJson object to a JSON string
+   * Updates the internal _jsonString cache
+   * @returns {number} 0 = success, -1 = error
+   */
   SerializeMe() {
     let parts = [];
     let i = 0;
@@ -732,11 +830,10 @@ class FlexJson {
     return 0;
   } // end SerializeMe()
 
+  /** Encode a string for JSON output (escape special characters) */
   EncodeString(vString = "") {
-    let s;
-    // *** NOTE: This is a simple encode.  It needs to be expanded in the future!
-    s = vString;
-    s = s.replace(/\\/g, "\\\\"); // **** NOTE: THIS MUST BE FIRST (so we do not double-escape the items below!)
+    let s = vString;
+    s = s.replace(/\\/g, "\\\\"); // Must be first to avoid double-escaping
     s = s.replace(/\t/g, "\\t");
     s = s.replace(/\n/g, "\\n");
     s = s.replace(/\r/g, "\\r");
@@ -745,8 +842,19 @@ class FlexJson {
       s = s.replace(/'/g, "\\'");
     }
     return s;
-  } // End Function
+  }
 
+  // ---------------------------------------------------------------------------
+  // Deserialization Methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Deserialize a JSON string (strict mode - standard JSON only)
+   * @param {string} snewString - The JSON string to parse
+   * @param {number} [start=0] - Starting position in the string
+   * @param {boolean} [OkToClip=false] - Allow extra content after JSON
+   * @returns {number} Status code (0 = success)
+   */
   Deserialize(snewString, start = 0, OkToClip = false) {
     if (this.trackingStats) {
       IncStats("stat_Deserialize");
