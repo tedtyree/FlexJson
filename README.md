@@ -357,11 +357,11 @@ The Tree-sitter grammar in `extensions/tree-sitter-jfx/` can be used with any ed
 
 ### Support
 
-If you like this project, You can support us with starring ⭐ this repository or donate to [uO.heartofkenya.com](https://u0.heartofkenya.com/).
+If you like this project, you can support us by starring ⭐ this repository or donating to [un0.org](https://un0.org/).
 
 ### Acknowledgements
 
-Special thanks to [u0.heartofKenya.com](https://u0.heartofkenya.com/) and [ebiashararahisi](https://ebiashararahisi.com/) for their work in Machakos, Kenya.
+Special thanks to [un0.org](https://un0.org/) and [eBiashara Rahisi Ltd](https://ebiashararahisi.com/) for their work in Machakos, Kenya.
 
 ### License
 
