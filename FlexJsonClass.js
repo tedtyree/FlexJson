@@ -9,6 +9,18 @@ function IsHex4(str) {
   return /^[0-9A-Fa-f]{4}$/.test(str);
 }
 
+/**
+ * Custom error class for FlexJson errors
+ * Includes status code and message for programmatic error handling
+ */
+class FlexJsonError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.name = "FlexJsonError";
+    this.status = status;
+  }
+}
+
 class FlexJson {
   _status = 0;
   _jsonType = "";
@@ -23,6 +35,7 @@ class FlexJson {
   ENCODE_SINGLE_QUOTES = false;
 
   _UseFlexJson = false;
+  _throwOnError = true; // Default: throw errors (set to false for silent mode)
 
   _meta = null;
   _NoStatsOrMsgs = false;
@@ -134,6 +147,13 @@ class FlexJson {
   set UseFlexJson(value) {
     this._UseFlexJson = value;
     this.InvalidateJsonString(1); // If we switch to FlexJson then all our stored JSON strings could be incorrect.
+  }
+
+  get throwOnError() {
+    return this._throwOnError;
+  }
+  set throwOnError(value) {
+    this._throwOnError = value === true;
   }
 
   get Status() {
@@ -646,8 +666,8 @@ class FlexJson {
                   o.jsonString
               );
             } else {
-              this._status = -53;
-              this.AddStatusMessage(
+              this.StatusErr(
+                -53,
                 "ERROR: Failed to serialize Object item " +
                   i +
                   " [err-53][" +
@@ -673,8 +693,8 @@ class FlexJson {
             if (k == 0 && o.Status == 0) {
               parts.push(o.jsonString);
             } else {
-              this._status = -52;
-              this.AddStatusMessage(
+              this.StatusErr(
+                -52,
                 "ERROR: Failed to serialize Array item " + i + " [err-52]"
               );
               return -1;
@@ -702,9 +722,8 @@ class FlexJson {
     } catch (err94) {
       this._jsonString = "";
       this.InvalidateJsonString(1);
-      this._status = -94;
-      // FUTURE: Remove err94.message below?
-      this.AddStatusMessage(
+      this.StatusErr(
+        -94,
         "ERROR: SerializeMe() failed to serialize the FlexJson object. [err-94] " +
           err94.message
       );
@@ -817,8 +836,8 @@ class FlexJson {
             }
           } else if (c == "{") {
             if (MustBeString) {
-              this._status = -124;
-              this.AddStatusMessage(
+              this.StatusErr(
+                -124,
                 "Invalid character '{' found. Expected string. @Line:" +
                   mePos.lineNumber +
                   ", @Position:" +
@@ -839,8 +858,8 @@ class FlexJson {
             } // ERROR message should have already been generated.
           } else if (c == "[") {
             if (MustBeString) {
-              this._status = -125;
-              this.AddStatusMessage(
+              this.StatusErr(
+                -125,
                 "Invalid character '[' found. Expected string. @Line:" +
                   mePos.lineNumber +
                   ", @Position:" +
@@ -911,8 +930,7 @@ class FlexJson {
           }
           if (!ok) {
             // generate error condition - invalid character
-            this._status = -102;
-            this.AddStatusMessage("ERROR: Invalid charater.  [err-102]");
+            this.StatusErr(-102, "ERROR: Invalid character. [err-102]");
             breakBreak = true;
             break;
           }
@@ -990,9 +1008,9 @@ class FlexJson {
               breakBreak = true;
               break;
             }
-            this._status = -192;
-            this.AddStatusMessage(
-              "ERROR: Additional text found after end of JSON.  [err-192]"
+            this.StatusErr(
+              -192,
+              "ERROR: Additional text found after end of JSON. [err-192]"
             );
             breakBreak = true;
             break;
@@ -1078,9 +1096,9 @@ class FlexJson {
               case "u":
                 // *** Here we need to get the next 4 digits and turn them into a character
                 if (mePos.absolutePosition > jsonEndPoint - 4) {
-                  this._status = -157;
-                  this.AddStatusMessage(
-                    "ERROR: Invalid \\u escape sequence.  [err-157]"
+                  this.StatusErr(
+                    -157,
+                    "ERROR: Invalid \\u escape sequence. [err-157]"
                   );
                   breakBreak = true;
                   break;
@@ -1092,8 +1110,8 @@ class FlexJson {
                   mePos.increment(4);
                 } else {
                   // *** Invalid format
-                  this._status = -151;
-                  this.AddStatusMessage(
+                  this.StatusErr(
+                    -151,
                     "Expected \\u escape sequence to be followed by a valid four-digit hex value @Line:" +
                       mePos.lineNumber +
                       " @Position:" +
@@ -1106,8 +1124,8 @@ class FlexJson {
                 break;
               default:
                 // *** Invalid format
-                this._status = -152;
-                this.AddStatusMessage(
+                this.StatusErr(
+                  -152,
                   "The \\ escape character is not followed by a valid value @Line:" +
                     mePos.lineNumber +
                     " @Position:" +
@@ -1162,8 +1180,8 @@ class FlexJson {
             meStatus = FlexJsonConstants.ST_AFTER_ITEM;
           } else {
             // not a valid character
-            this._status = -159;
-            this.AddStatusMessage(
+            this.StatusErr(
+              -159,
               "Invalid character found in non-quoted string: char:[" +
                 c +
                 "] @Line:" +
@@ -1188,8 +1206,8 @@ class FlexJson {
       }
       safety--;
       if (safety <= 0) {
-        this._status = -169;
-        this.AddStatusMessage(
+        this.StatusErr(
+          -169,
           "Maximum iterations reached: DeserializeMe(): @Line:" +
             mePos.lineNumber +
             " @Position:" +
@@ -1241,8 +1259,8 @@ class FlexJson {
             if (!this._UseFlexJson) {
               // ERROR: we found an unquoted string and we are not using FlexJson
               // NOTE! Error occurred at the START of this item
-              this._status = -199;
-              this.AddStatusMessage(
+              this.StatusErr(
+                -199,
                 "Encountered unquoted string: @Line:" +
                   start.lineNumber +
                   " @Position:" +
@@ -1294,6 +1312,7 @@ class FlexJson {
       jClone.keepComments = true;
     }
     jClone.ALLOW_SINGLE_QUOTE_STRINGS = this.ALLOW_SINGLE_QUOTE_STRINGS;
+    jClone._throwOnError = this._throwOnError; // Propagate error handling mode
     return jClone;
   }
 
@@ -1614,8 +1633,11 @@ class FlexJson {
       const fsData = fs.readFileSync(FilePath, "utf8");
       this.Deserialize(fsData, 0, OkToClip);
     } catch (err) {
-      this._status = -32;
-      this.statusMsg = err.message;
+      // Only handle file I/O errors here, not FlexJsonErrors from Deserialize
+      if (err instanceof FlexJsonError) {
+        throw err; // Re-throw FlexJsonError
+      }
+      this.StatusErr(-32, "ERROR: Failed to read file: " + err.message);
       return this._status;
     }
   }
@@ -1653,6 +1675,9 @@ class FlexJson {
   StatusErr(nErr, strErr) {
     this._status = nErr;
     this.AddStatusMessage(strErr);
+    if (this._throwOnError) {
+      throw new FlexJsonError(nErr, strErr);
+    }
   } // End
 
   // FUTURE: Replace this with this.statusMsg=...
@@ -1699,3 +1724,4 @@ class FlexJson {
 }
 
 module.exports = FlexJson;
+module.exports.FlexJsonError = FlexJsonError;

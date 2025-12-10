@@ -1,4 +1,18 @@
 /**
+ * Custom error class for FlexJson errors
+ * Thrown when throwOnError is true (default) and an error occurs
+ */
+declare class FlexJsonError extends Error {
+  /** Error status code (negative number) */
+  status: number;
+  
+  /** Error message */
+  message: string;
+  
+  constructor(status: number, message: string);
+}
+
+/**
  * FlexJson - Flexible JSON manipulation library for JavaScript
  * Supports comments, single/double/unquoted strings, and preserves formatting
  */
@@ -34,6 +48,12 @@ declare class FlexJson {
 
   /** Enable FlexJson mode (comments, unquoted strings, single quotes) */
   UseFlexJson: boolean;
+
+  /** 
+   * If true (default), throws FlexJsonError on errors.
+   * If false, errors are silent and only set Status/statusMsg.
+   */
+  throwOnError: boolean;
 
   /** Preserve whitespace during deserialization */
   keepSpacing: boolean;
@@ -284,3 +304,4 @@ declare class FlexJson {
 }
 
 export = FlexJson;
+export { FlexJsonError };
