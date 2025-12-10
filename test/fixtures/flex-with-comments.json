@@ -1,0 +1,15 @@
+/* This is a FlexJson config file
+** with multi-line comments
+*/
+{
+  // User settings
+  name: 'John Doe',
+  age: 30,
+  active: true,
+  // Database config
+  database: {
+    host: localhost,
+    port: 5432
+    // password: 'secret' - commented out
+  }
+}
