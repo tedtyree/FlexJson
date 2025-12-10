@@ -2,7 +2,6 @@ const FlexJsonConstants = require("./FlexJsonConstants.js");
 const FlexJsonPosition = require("./FlexJsonPosition.js");
 const FlexJsonMeta = require("./FlexJsonMeta.js");
 const fs = require("fs");
-const StringBuilder = require("string-builder");
 
 // Helper function to check if a string is exactly 4 valid hex characters
 function IsHex4(str) {
@@ -676,7 +675,7 @@ class FlexJson {
   // SerializeMe() - Use this to Serialize the items that are already in the FlexJson object.
   // Return: 0=OK, -1=Error
   SerializeMe() {
-    let s = new StringBuilder();
+    let parts = [];
     let i = 0;
     let k = 0;
     let preKey = "";
@@ -692,15 +691,15 @@ class FlexJson {
       let preSpace = this.preSpace;
       if (preSpace) {
         // Here we ignore keepSpacing/keepComments - these flags are only used during the deserialize process
-        s.append(preSpace); // preSpace of overall object/array or item
+        parts.push(preSpace); // preSpace of overall object/array or item
       }
       switch (this._jsonType) {
         case "object":
-          s.append("{");
+          parts.push("{");
           i = 0;
           this._value.forEach((o) => {
             if (i > 0) {
-              s.append(",");
+              parts.push(",");
             }
             let k = o.SerializeMe();
 
@@ -710,7 +709,7 @@ class FlexJson {
             let oPostKey = o.postKey || "";
 
             if (k == 0 && o.Status == 0) {
-              s.append(
+              parts.push(
                 oPreKey +
                   '"' +
                   o.key.toString() +
@@ -734,18 +733,18 @@ class FlexJson {
             }
             i++;
           }); // end foreach
-          s.append("}");
+          parts.push("}");
           break;
         case "array":
-          s.append("[");
+          parts.push("[");
           i = 0;
           this._value.forEach((o) => {
             if (i > 0) {
-              s.append(",");
+              parts.push(",");
             }
             k = o.SerializeMe();
             if (k == 0 && o.Status == 0) {
-              s.append(o.jsonString);
+              parts.push(o.jsonString);
             } else {
               this._status = -52;
               this.AddStatusMessage(
@@ -755,23 +754,23 @@ class FlexJson {
             }
             i++;
           });
-          s.append("]");
+          parts.push("]");
           break;
         case "null":
-          s.append("null");
+          parts.push("null");
           break;
         case "string":
-          s.append('"' + this.EncodeString(this.toStr()) + '"');
+          parts.push('"' + this.EncodeString(this.toStr()) + '"');
           break;
         default:
-          s.append(this.toStr()); // FUTURE: better approach? seems prone to problems
+          parts.push(this.toStr()); // FUTURE: better approach? seems prone to problems
           break;
       }
       let postSpace = "" + (this.postSpace || "") + (this.finalSpace || "");
       if (postSpace) {
-        s.append(postSpace);
+        parts.push(postSpace);
       }
-      this._jsonString = s.toString();
+      this._jsonString = parts.join("");
       this._jsonString_valid = true;
     } catch (err94) {
       this._jsonString = "";
