@@ -313,6 +313,8 @@ The Tree-sitter grammar in `extensions/tree-sitter-jfx/` can be used with any ed
 - Add support for """ and ''' multi-line quotes
 - Publish as a VS Code extension
 - Publish to Open VSX
+- Add/verify support for reading/writing to .jfx files
+- Revamp error handling
 
 ### Support
 

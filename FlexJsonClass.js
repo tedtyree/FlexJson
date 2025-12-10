@@ -45,6 +45,18 @@ class FlexJson {
     }
   }
 
+  // Helper methods for meta property access (reduces repetitive getter/setter code)
+  _getMetaProp(name, defaultVal = null) {
+    return this._meta && this._meta[name] != null ? this._meta[name] : defaultVal;
+  }
+
+  _setMetaProp(name, value) {
+    this.createMetaIfNeeded();
+    if (this._meta) {
+      this._meta[name] = value;
+    }
+  }
+
 
   get trackingStats() {
     if (this._meta == null || this._meta.status == null) {
@@ -95,111 +107,26 @@ class FlexJson {
     this._key = "" + value; // convert to string (future: allow numeric key?)
   }
 
-  get preSpace() {
-    //if (this._meta != null) {
-    //  if (this._meta.preSpace != null) {
-    //    return this._meta.preSpace;
-    //  }
-    //}
-    return this._meta && this._meta.preSpace ? this._meta.preSpace : null;
-  }
+  get preSpace() { return this._getMetaProp("preSpace"); }
+  set preSpace(value) { this._setMetaProp("preSpace", value); }
 
-  set preSpace(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.preSpace = value;
-    }
-  }
+  get postSpace() { return this._getMetaProp("postSpace"); }
+  set postSpace(value) { this._setMetaProp("postSpace", value); }
 
-  get postSpace() {
-    //if (this._meta != null) {
-    //  if (this._meta.postSpace != null) {
-    //    return this._meta.postSpace;
-    //  }
-    //}
-    return this._meta && this._meta.postSpace ? this._meta.postSpace : null;
-  }
+  get finalSpace() { return this._getMetaProp("finalSpace"); }
+  set finalSpace(value) { this._setMetaProp("finalSpace", value); }
 
-  set postSpace(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.postSpace = value;
-    }
-  }
+  get preKey() { return this._getMetaProp("preKey"); }
+  set preKey(value) { this._setMetaProp("preKey", value); }
 
-  get finalSpace() {
-    if (this._meta != null) {
-      if (this._meta.finalSpace != null) {
-        return this._meta.finalSpace;
-      }
-    }
-    return null;
-  }
+  get postKey() { return this._getMetaProp("postKey"); }
+  set postKey(value) { this._setMetaProp("postKey", value); }
 
-  set finalSpace(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.finalSpace = value;
-    }
-  }
+  get keepSpacing() { return this._getMetaProp("keepSpacing", false); }
+  set keepSpacing(value) { this._setMetaProp("keepSpacing", value); }
 
-  get preKey() {
-    if (this._meta != null) {
-      if (this._meta.preKey != null) {
-        return this._meta.preKey;
-      }
-    }
-    return null;
-  }
-
-  set preKey(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.preKey = value;
-    }
-  }
-
-  get postKey() {
-    if (this._meta != null) {
-      if (this._meta.postKey != null) {
-        return this._meta.postKey;
-      }
-    }
-    return null;
-  }
-
-  set postKey(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.postKey = value;
-    }
-  }
-
-  get keepSpacing() {
-    if (this._meta != null) {
-      return this._meta.keepSpacing || false;
-    }
-    return false;
-  }
-  set keepSpacing(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.keepSpacing = value;
-    }
-  }
-
-  get keepComments() {
-    if (this._meta != null) {
-      return this._meta.keepComments || false;
-    }
-    return false;
-  }
-  set keepComments(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.keepComments = value;
-    }
-  }
+  get keepComments() { return this._getMetaProp("keepComments", false); }
+  set keepComments(value) { this._setMetaProp("keepComments", value); }
 
   get UseFlexJson() {
     return this._UseFlexJson;
