@@ -97,9 +97,13 @@ class FlexJson {
    * Create a new FlexJson instance
    * @param {string} [InitialJSON] - Optional JSON string to parse immediately
    * @param {boolean} [UseFlexJsonFlag] - Enable flex mode for parsing
+   * @param {boolean} [ThrowOnError] - If true (default), throw errors; if false, use silent mode
    */
-  constructor(InitialJSON, UseFlexJsonFlag) {
-    if (UseFlexJsonFlag == true || UseFlexJsonFlag == false) {
+  constructor(InitialJSON, UseFlexJsonFlag, ThrowOnError) {
+    if (ThrowOnError === true || ThrowOnError === false) {
+      this._throwOnError = ThrowOnError;
+    }
+    if (UseFlexJsonFlag === true || UseFlexJsonFlag === false) {
       this.UseFlexJson = UseFlexJsonFlag;
     }
     if (InitialJSON) {
@@ -538,6 +542,7 @@ class FlexJson {
       newV.thisValue = value; // This also sets the jsonType
     }
     newV.Parent = this;
+    newV._throwOnError = this._throwOnError; // Inherit error handling mode
 
     // Can only add to an Object or Array
     if (this._jsonType == "object") {
