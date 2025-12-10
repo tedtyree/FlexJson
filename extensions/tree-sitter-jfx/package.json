@@ -1,0 +1,42 @@
+{
+  "name": "tree-sitter-jfx",
+  "version": "0.1.0",
+  "description": "Tree-sitter grammar for FlexJson (.jfx) files",
+  "main": "bindings/node",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tedtyree/FlexJson.git"
+  },
+  "keywords": [
+    "tree-sitter",
+    "parser",
+    "lexer",
+    "json",
+    "flexjson",
+    "jfx"
+  ],
+  "author": "FlexJson Team",
+  "license": "MIT",
+  "dependencies": {
+    "nan": "^2.18.0"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.20.8"
+  },
+  "scripts": {
+    "generate": "tree-sitter generate",
+    "build": "tree-sitter generate && node-gyp rebuild",
+    "test": "tree-sitter test",
+    "parse": "tree-sitter parse"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.jfx",
+      "file-types": [
+        "jfx"
+      ],
+      "injection-regex": "^jfx$",
+      "highlights": "queries/highlights.scm"
+    }
+  ]
+}
