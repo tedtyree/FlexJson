@@ -203,6 +203,57 @@ test("WriteToFile() writes JSON to file", () => {
   fs.unlinkSync(tempFile);
 });
 
+test("round-trip preserves comments and whitespace when modifying value", () => {
+  // Original content with comments and specific whitespace
+  const originalContent = `{
+  // User configuration
+  name: "John",
+  
+  /* Age in years
+     Updated annually */
+  age: 30,
+  
+  // Is the user active?
+  active: true
+}`;
+
+  // Write original to temp file
+  fs.writeFileSync(tempFile, originalContent, "utf8");
+
+  // Read with keepSpacing and keepComments enabled
+  const fj = new FlexJson();
+  fj.keepSpacing = true;
+  fj.keepComments = true;
+  fj.DeserializeFlexFile(tempFile);
+  assert.strictEqual(fj.Status, 0);
+
+  // Modify one value
+  fj.item("age").thisValue = 31;
+
+  // Write back to file
+  const writeResult = fj.WriteToFile(tempFile);
+  assert.strictEqual(writeResult, 0);
+
+  // Read the file content back
+  const newContent = fs.readFileSync(tempFile, "utf8");
+
+  // Verify comments are preserved
+  assert.strictEqual(newContent.includes("// User configuration"), true, "Line comment should be preserved");
+  assert.strictEqual(newContent.includes("/* Age in years"), true, "Block comment start should be preserved");
+  assert.strictEqual(newContent.includes("Updated annually */"), true, "Block comment end should be preserved");
+  assert.strictEqual(newContent.includes("// Is the user active?"), true, "Inline comment should be preserved");
+
+  // Verify the value was changed
+  assert.strictEqual(newContent.includes("31"), true, "New age value should be present");
+
+  // Verify other values are unchanged
+  assert.strictEqual(newContent.includes("John"), true, "Name should be unchanged");
+  assert.strictEqual(newContent.includes("true"), true, "Active should be unchanged");
+
+  // Cleanup
+  fs.unlinkSync(tempFile);
+});
+
 // ============================================================================
 // PROPERTY ACCESS TESTS
 // ============================================================================
