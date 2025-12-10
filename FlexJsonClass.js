@@ -372,11 +372,11 @@ class FlexJson {
       ) {
         let nKey = null;
         try {
-          nCheck = parseInt(sKey);
+          let nCheck = parseInt(sKey);
           if (!isNaN(nCheck)) {
             nKey = nCheck;
           }
-        } catch (Exception) {}
+        } catch (e) {}
         if (nKey) {
           if (nKey < 0 || nKey >= this._value.length) {
             break;
@@ -1061,10 +1061,10 @@ class FlexJson {
                 meString += "\t"; //Tab character
                 break;
               case "b":
-                meString += Convert.ToChar(8);
+                meString += "\b"; // Backspace character
                 break;
-              case "c":
-                meString += Convert.ToChar(13);
+              case "f":
+                meString += "\f"; // Form feed character
                 break;
               case "n":
                 meString += "\n"; //New Line Character
@@ -1073,7 +1073,7 @@ class FlexJson {
                 meString += "\r"; //LineFeedCarriageReturn
                 break;
               case "v":
-                meString += "*"; // ***** FUTURE: Need to determine this character!
+                meString += "\v"; // Vertical tab character
                 break;
               case "u":
                 // *** Here we need to get the next 4 digits and turn them into a character
@@ -1087,9 +1087,8 @@ class FlexJson {
                 }
                 c2 = meJsonString.substring(mePos.absolutePosition + 1, mePos.absolutePosition + 5);
                 if (IsHex4(c2)) {
-                  // FUTURE-NEW!!! FIX THIS! TODO - NOW- PROBLEM!!!
-                  let asciiValue = "####"; //System.Convert.ToChar(System.Convert.ToUInt32(c, 16)) + "";
-                  meString += asciiValue;
+                  let charCode = parseInt(c2, 16);
+                  meString += String.fromCharCode(charCode);
                   mePos.increment(4);
                 } else {
                   // *** Invalid format
@@ -1225,14 +1224,14 @@ class FlexJson {
             // If the above did not match, lets see if this text is numeric...
             if (this._jsonType == "nqstring") {
               try {
-                valueCheck = parseFloat(tmpString);
+                let valueCheck = parseFloat(tmpString);
                 if (!isNaN(valueCheck)) {
                   this._value = valueCheck;
 
                   // It worked... keep going...
                   this._jsonType = FlexJsonConstants.typeNumber;
                 }
-              } catch (Exception) {}
+              } catch (e) {}
             }
           }
           // If STILL not identified, then it must be a STRING (ONLY valid as an unquoted string if using FlexJson!)
@@ -1416,7 +1415,7 @@ class FlexJson {
         if (
           jNew.Status == -11 &&
           jNew.jsonType == "null" &&
-          _UseFlexJson == true
+          this._UseFlexJson == true
         ) {
           // Note: jNew.status=-11 indicates nothing was found where there should have been a value - for FLEX JSON this is legitimate.
           jNew._status = 0; // this is OK
