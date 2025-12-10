@@ -3,6 +3,7 @@
   "version": "0.0.5",
   "description": "This is a library that makes each 'Node' in the JSON Object/Array a JSON Object with a Key/Value pair.",
   "main": "FlexJsonClass.js",
+  "types": "FlexJsonClass.d.ts",
   "authors": "[michael njuguna michaelnjuguna184@gmail.com, ted tyree tedtyree@gmail.com]",
   "keywords": [
     "JSON",
