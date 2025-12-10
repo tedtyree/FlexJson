@@ -1,0 +1,8 @@
+{
+  apple: red,
+  banana: yellow,
+  count: 42,
+  enabled: true,
+  disabled: false,
+  nothing: null
+}

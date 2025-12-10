@@ -4,6 +4,11 @@ const FlexJsonMeta = require("./FlexJsonMeta.js");
 const fs = require("fs");
 const StringBuilder = require("string-builder");
 
+// Helper function to check if a string is exactly 4 valid hex characters
+function IsHex4(str) {
+  if (str == null || str.length !== 4) return false;
+  return /^[0-9A-Fa-f]{4}$/.test(str);
+}
 
 class FlexJson {
   _status = 0;
@@ -51,7 +56,7 @@ class FlexJson {
 
   get statusMsg() {
     if (this._meta != null && this._meta.statusMsg != null) {
-      return meta.statusMsg;
+      return this._meta.statusMsg;
     }
     return "";
   }
@@ -859,7 +864,7 @@ class FlexJson {
     ) {
       c = meJsonString.charAt(mePos.absolutePosition);
       if (mePos.absolutePosition < jsonEndPoint) {
-        c2 = meJsonString.substr(mePos.absolutePosition, 2);
+        c2 = meJsonString.substring(mePos.absolutePosition, mePos.absolutePosition + 2);
       } else {
         c2 = "";
       }
@@ -1050,9 +1055,9 @@ class FlexJson {
               // if we are keeping comments+ then we should probably grab this garbage text
               // This will allow us to modify a FlexJSON text file/block and write it back "AS IS"
               if (keepCM) {
-                let finalGarbage = meJsonString.substr(
+                let finalGarbage = meJsonString.substring(
                   mePos.absolutePosition,
-                  meJsonString.length - mePos.absolutePosition
+                  meJsonString.length
                 );
                 getSpace += finalGarbage;
               }
@@ -1154,7 +1159,7 @@ class FlexJson {
                   breakBreak = true;
                   break;
                 }
-                c2 = substr(meJsonString, mePos.absolutePosition + 1, 4);
+                c2 = meJsonString.substring(mePos.absolutePosition + 1, mePos.absolutePosition + 5);
                 if (IsHex4(c2)) {
                   // FUTURE-NEW!!! FIX THIS! TODO - NOW- PROBLEM!!!
                   let asciiValue = "####"; //System.Convert.ToChar(System.Convert.ToUInt32(c, 16)) + "";
@@ -1335,9 +1340,9 @@ class FlexJson {
 
     // Store original JSON string and mark as "valid"
     if (this._status == 0) {
-      this._jsonString = meJsonString.substr(
+      this._jsonString = meJsonString.substring(
         start.absolutePosition,
-        mePos.absolutePosition - start.absolutePosition
+        mePos.absolutePosition
       );
       this._jsonString_valid = true;
     } else {

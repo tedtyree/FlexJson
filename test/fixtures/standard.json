@@ -1,0 +1,11 @@
+{
+  "name": "John",
+  "age": 30,
+  "active": true,
+  "balance": null,
+  "tags": ["developer", "nodejs"],
+  "address": {
+    "city": "New York",
+    "zip": "10001"
+  }
+}
