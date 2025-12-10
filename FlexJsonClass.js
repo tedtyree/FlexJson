@@ -2,7 +2,6 @@ const FlexJsonConstants = require("./FlexJsonConstants.js");
 const FlexJsonPosition = require("./FlexJsonPosition.js");
 const FlexJsonMeta = require("./FlexJsonMeta.js");
 const fs = require("fs");
-const StringBuilder = require("string-builder");
 
 // Helper function to check if a string is exactly 4 valid hex characters
 function IsHex4(str) {
@@ -43,6 +42,18 @@ class FlexJson {
     } // Do not track stats/message/meta-data
     if (!this._meta) {
       this._meta = {};
+    }
+  }
+
+  // Helper methods for meta property access (reduces repetitive getter/setter code)
+  _getMetaProp(name, defaultVal = null) {
+    return this._meta && this._meta[name] != null ? this._meta[name] : defaultVal;
+  }
+
+  _setMetaProp(name, value) {
+    this.createMetaIfNeeded();
+    if (this._meta) {
+      this._meta[name] = value;
     }
   }
 
@@ -96,111 +107,26 @@ class FlexJson {
     this._key = "" + value; // convert to string (future: allow numeric key?)
   }
 
-  get preSpace() {
-    //if (this._meta != null) {
-    //  if (this._meta.preSpace != null) {
-    //    return this._meta.preSpace;
-    //  }
-    //}
-    return this._meta && this._meta.preSpace ? this._meta.preSpace : null;
-  }
+  get preSpace() { return this._getMetaProp("preSpace"); }
+  set preSpace(value) { this._setMetaProp("preSpace", value); }
 
-  set preSpace(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.preSpace = value;
-    }
-  }
+  get postSpace() { return this._getMetaProp("postSpace"); }
+  set postSpace(value) { this._setMetaProp("postSpace", value); }
 
-  get postSpace() {
-    //if (this._meta != null) {
-    //  if (this._meta.postSpace != null) {
-    //    return this._meta.postSpace;
-    //  }
-    //}
-    return this._meta && this._meta.postSpace ? this._meta.postSpace : null;
-  }
+  get finalSpace() { return this._getMetaProp("finalSpace"); }
+  set finalSpace(value) { this._setMetaProp("finalSpace", value); }
 
-  set postSpace(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.postSpace = value;
-    }
-  }
+  get preKey() { return this._getMetaProp("preKey"); }
+  set preKey(value) { this._setMetaProp("preKey", value); }
 
-  get finalSpace() {
-    if (this._meta != null) {
-      if (this._meta.finalSpace != null) {
-        return this._meta.finalSpace;
-      }
-    }
-    return null;
-  }
+  get postKey() { return this._getMetaProp("postKey"); }
+  set postKey(value) { this._setMetaProp("postKey", value); }
 
-  set finalSpace(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.finalSpace = value;
-    }
-  }
+  get keepSpacing() { return this._getMetaProp("keepSpacing", false); }
+  set keepSpacing(value) { this._setMetaProp("keepSpacing", value); }
 
-  get preKey() {
-    if (this._meta != null) {
-      if (this._meta.preKey != null) {
-        return this._meta.preKey;
-      }
-    }
-    return null;
-  }
-
-  set preKey(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.preKey = value;
-    }
-  }
-
-  get postKey() {
-    if (this._meta != null) {
-      if (this._meta.postKey != null) {
-        return this._meta.postKey;
-      }
-    }
-    return null;
-  }
-
-  set postKey(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.postKey = value;
-    }
-  }
-
-  get keepSpacing() {
-    if (this._meta != null) {
-      return this._meta.keepSpacing || false;
-    }
-    return false;
-  }
-  set keepSpacing(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.keepSpacing = value;
-    }
-  }
-
-  get keepComments() {
-    if (this._meta != null) {
-      return this._meta.keepComments || false;
-    }
-    return false;
-  }
-  set keepComments(value) {
-    this.createMetaIfNeeded();
-    if (this._meta != null) {
-      this._meta.keepComments = value;
-    }
-  }
+  get keepComments() { return this._getMetaProp("keepComments", false); }
+  set keepComments(value) { this._setMetaProp("keepComments", value); }
 
   get UseFlexJson() {
     return this._UseFlexJson;
@@ -446,11 +372,11 @@ class FlexJson {
       ) {
         let nKey = null;
         try {
-          nCheck = parseInt(sKey);
+          let nCheck = parseInt(sKey);
           if (!isNaN(nCheck)) {
             nKey = nCheck;
           }
-        } catch (Exception) {}
+        } catch (e) {}
         if (nKey) {
           if (nKey < 0 || nKey >= this._value.length) {
             break;
@@ -676,7 +602,7 @@ class FlexJson {
   // SerializeMe() - Use this to Serialize the items that are already in the FlexJson object.
   // Return: 0=OK, -1=Error
   SerializeMe() {
-    let s = new StringBuilder();
+    let parts = [];
     let i = 0;
     let k = 0;
     let preKey = "";
@@ -692,15 +618,15 @@ class FlexJson {
       let preSpace = this.preSpace;
       if (preSpace) {
         // Here we ignore keepSpacing/keepComments - these flags are only used during the deserialize process
-        s.append(preSpace); // preSpace of overall object/array or item
+        parts.push(preSpace); // preSpace of overall object/array or item
       }
       switch (this._jsonType) {
         case "object":
-          s.append("{");
+          parts.push("{");
           i = 0;
           this._value.forEach((o) => {
             if (i > 0) {
-              s.append(",");
+              parts.push(",");
             }
             let k = o.SerializeMe();
 
@@ -710,7 +636,7 @@ class FlexJson {
             let oPostKey = o.postKey || "";
 
             if (k == 0 && o.Status == 0) {
-              s.append(
+              parts.push(
                 oPreKey +
                   '"' +
                   o.key.toString() +
@@ -734,18 +660,18 @@ class FlexJson {
             }
             i++;
           }); // end foreach
-          s.append("}");
+          parts.push("}");
           break;
         case "array":
-          s.append("[");
+          parts.push("[");
           i = 0;
           this._value.forEach((o) => {
             if (i > 0) {
-              s.append(",");
+              parts.push(",");
             }
             k = o.SerializeMe();
             if (k == 0 && o.Status == 0) {
-              s.append(o.jsonString);
+              parts.push(o.jsonString);
             } else {
               this._status = -52;
               this.AddStatusMessage(
@@ -755,23 +681,23 @@ class FlexJson {
             }
             i++;
           });
-          s.append("]");
+          parts.push("]");
           break;
         case "null":
-          s.append("null");
+          parts.push("null");
           break;
         case "string":
-          s.append('"' + this.EncodeString(this.toStr()) + '"');
+          parts.push('"' + this.EncodeString(this.toStr()) + '"');
           break;
         default:
-          s.append(this.toStr()); // FUTURE: better approach? seems prone to problems
+          parts.push(this.toStr()); // FUTURE: better approach? seems prone to problems
           break;
       }
       let postSpace = "" + (this.postSpace || "") + (this.finalSpace || "");
       if (postSpace) {
-        s.append(postSpace);
+        parts.push(postSpace);
       }
-      this._jsonString = s.toString();
+      this._jsonString = parts.join("");
       this._jsonString_valid = true;
     } catch (err94) {
       this._jsonString = "";
@@ -1135,10 +1061,10 @@ class FlexJson {
                 meString += "\t"; //Tab character
                 break;
               case "b":
-                meString += Convert.ToChar(8);
+                meString += "\b"; // Backspace character
                 break;
-              case "c":
-                meString += Convert.ToChar(13);
+              case "f":
+                meString += "\f"; // Form feed character
                 break;
               case "n":
                 meString += "\n"; //New Line Character
@@ -1147,7 +1073,7 @@ class FlexJson {
                 meString += "\r"; //LineFeedCarriageReturn
                 break;
               case "v":
-                meString += "*"; // ***** FUTURE: Need to determine this character!
+                meString += "\v"; // Vertical tab character
                 break;
               case "u":
                 // *** Here we need to get the next 4 digits and turn them into a character
@@ -1161,9 +1087,8 @@ class FlexJson {
                 }
                 c2 = meJsonString.substring(mePos.absolutePosition + 1, mePos.absolutePosition + 5);
                 if (IsHex4(c2)) {
-                  // FUTURE-NEW!!! FIX THIS! TODO - NOW- PROBLEM!!!
-                  let asciiValue = "####"; //System.Convert.ToChar(System.Convert.ToUInt32(c, 16)) + "";
-                  meString += asciiValue;
+                  let charCode = parseInt(c2, 16);
+                  meString += String.fromCharCode(charCode);
                   mePos.increment(4);
                 } else {
                   // *** Invalid format
@@ -1299,14 +1224,14 @@ class FlexJson {
             // If the above did not match, lets see if this text is numeric...
             if (this._jsonType == "nqstring") {
               try {
-                valueCheck = parseFloat(tmpString);
+                let valueCheck = parseFloat(tmpString);
                 if (!isNaN(valueCheck)) {
                   this._value = valueCheck;
 
                   // It worked... keep going...
                   this._jsonType = FlexJsonConstants.typeNumber;
                 }
-              } catch (Exception) {}
+              } catch (e) {}
             }
           }
           // If STILL not identified, then it must be a STRING (ONLY valid as an unquoted string if using FlexJson!)
@@ -1490,7 +1415,7 @@ class FlexJson {
         if (
           jNew.Status == -11 &&
           jNew.jsonType == "null" &&
-          _UseFlexJson == true
+          this._UseFlexJson == true
         ) {
           // Note: jNew.status=-11 indicates nothing was found where there should have been a value - for FLEX JSON this is legitimate.
           jNew._status = 0; // this is OK

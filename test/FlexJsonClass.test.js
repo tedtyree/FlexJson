@@ -379,8 +379,8 @@ test("jsonType returns correct type", () => {
   assert.strictEqual(new FlexJson('{"a": 1}', true).jsonType, "object");
   assert.strictEqual(new FlexJson('[1, 2]', true).jsonType, "array");
   assert.strictEqual(new FlexJson('"hello"', true).jsonType, "string");
-  // Standalone unquoted values: 42 becomes string, true becomes boolean, null becomes null
-  assert.strictEqual(new FlexJson("42", true).jsonType, "string");
+  // Standalone unquoted values: 42 becomes number, true becomes boolean, null becomes null
+  assert.strictEqual(new FlexJson("42", true).jsonType, "number");
   assert.strictEqual(new FlexJson("true", true).jsonType, "boolean");
   assert.strictEqual(new FlexJson("null", true).jsonType, "null");
 });
@@ -562,13 +562,12 @@ test("reports error for truncated unicode escape", () => {
   assert.strictEqual(fj.Status < 0, true);
 });
 
-// NOTE: Valid unicode escape test commented out - library has placeholder "####" instead of actual conversion
-// test("parses valid unicode escape sequences", () => {
-//   const fj = new FlexJson();
-//   fj.DeserializeFlex('{"name": "test\\u0041"}'); // \u0041 = 'A'
-//   assert.strictEqual(fj.Status, 0);
-//   assert.strictEqual(fj.item("name").thisValue, "testA");
-// });
+test("parses valid unicode escape sequences", () => {
+  const fj = new FlexJson();
+  fj.DeserializeFlex('{"name": "test\\u0041"}'); // \u0041 = 'A'
+  assert.strictEqual(fj.Status, 0);
+  assert.strictEqual(fj.item("name").thisValue, "testA");
+});
 
 // ============================================================================
 // NULL AND MISSING VALUE TESTS
