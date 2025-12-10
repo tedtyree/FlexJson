@@ -40,11 +40,11 @@ function section(name) {
 
 // Fixture paths
 const fixturesDir = path.join(__dirname, "fixtures");
-const standardJson = path.join(fixturesDir, "standard.json");
-const flexWithComments = path.join(fixturesDir, "flex-with-comments.json");
-const flexUnquoted = path.join(fixturesDir, "flex-unquoted.json");
-const arrayJson = path.join(fixturesDir, "array.json");
-const nestedJson = path.join(fixturesDir, "nested.json");
+const standardJson = path.join(fixturesDir, "standard.jfx");
+const flexWithComments = path.join(fixturesDir, "flex-with-comments.jfx");
+const flexUnquoted = path.join(fixturesDir, "flex-unquoted.jfx");
+const arrayJson = path.join(fixturesDir, "array.jfx");
+const nestedJson = path.join(fixturesDir, "nested.jfx");
 const tempFile = path.join(fixturesDir, "temp-output.json");
 
 // ============================================================================
