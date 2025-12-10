@@ -21,8 +21,9 @@ declare class FlexJson {
    * Creates a new FlexJson instance
    * @param initialJSON - Optional JSON string to parse
    * @param useFlexJsonFlag - If true, enables FlexJson mode (comments, unquoted strings, etc.)
+   * @param throwOnError - If true (default), throw errors; if false, use silent mode
    */
-  constructor(initialJSON?: string, useFlexJsonFlag?: boolean);
+  constructor(initialJSON?: string, useFlexJsonFlag?: boolean, throwOnError?: boolean);
 
   // ============================================================================
   // Properties

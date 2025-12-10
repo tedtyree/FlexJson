@@ -687,6 +687,59 @@ test("throwOnError=false does not throw on file read error", () => {
   assert.strictEqual(fj.Status, -32, "Status should indicate file error");
 });
 
+// ---------------------------------------------------------------------------
+// Constructor throwOnError Parameter Tests
+// ---------------------------------------------------------------------------
+
+test("constructor with throwOnError=true throws on invalid JSON", () => {
+  let threw = false;
+  let errorStatus = null;
+  try {
+    new FlexJson('{invalid!!!}', true, true);
+  } catch (err) {
+    threw = true;
+    errorStatus = err.status;
+    assert.strictEqual(err.name, "FlexJsonError");
+  }
+  assert.strictEqual(threw, true, "Should have thrown FlexJsonError");
+  assert.strictEqual(errorStatus < 0, true, "Error status should be negative");
+});
+
+test("constructor with throwOnError=true throws on unquoted string in strict mode", () => {
+  let threw = false;
+  try {
+    new FlexJson('{name: John}', false, true); // strict mode, throw enabled
+  } catch (err) {
+    threw = true;
+    assert.strictEqual(err.name, "FlexJsonError");
+  }
+  assert.strictEqual(threw, true, "Should have thrown FlexJsonError for unquoted string");
+});
+
+test("constructor with throwOnError=false does not throw on invalid JSON", () => {
+  let threw = false;
+  let fj = null;
+  try {
+    fj = new FlexJson('{invalid!!!}', true, false);
+  } catch (err) {
+    threw = true;
+  }
+  assert.strictEqual(threw, false, "Should not have thrown");
+  assert.notStrictEqual(fj.Status, 0, "Status should indicate error");
+});
+
+test("constructor with throwOnError=false does not throw on unquoted string in strict mode", () => {
+  let threw = false;
+  let fj = null;
+  try {
+    fj = new FlexJson('{name: John}', false, false); // strict mode, throw disabled
+  } catch (err) {
+    threw = true;
+  }
+  assert.strictEqual(threw, false, "Should not have thrown");
+  assert.strictEqual(fj.Status < 0, true, "Status should be negative error code");
+});
+
 // ============================================================================
 // NULL AND MISSING VALUE TESTS
 // ============================================================================
