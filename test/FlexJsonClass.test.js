@@ -79,7 +79,10 @@ test("creates FlexJson with UseFlexJson flag", () => {
 
 test("handles invalid JSON string gracefully", () => {
   // Invalid characters create truly invalid JSON
-  const fj = new FlexJson('{invalid json here!!!}', true);
+  const fj = new FlexJson();
+  fj.throwOnError = false; // Use silent mode for this test
+  fj.UseFlexJson = true;
+  fj.Deserialize('{invalid json here!!!}');
   assert.notStrictEqual(fj.Status, 0);
 });
 
@@ -568,12 +571,14 @@ section("Syntax Error Reporting");
 
 test("reports error for invalid JSON with non-zero Status", () => {
   const fj = new FlexJson();
+  fj.throwOnError = false;
   fj.Deserialize('{invalid json!!!}');
   assert.notStrictEqual(fj.Status, 0);
 });
 
 test("reports error for unquoted string in strict mode", () => {
   const fj = new FlexJson();
+  fj.throwOnError = false;
   fj.Deserialize('{name: John}'); // unquoted not allowed in strict mode
   assert.notStrictEqual(fj.Status, 0);
   // Status should be negative to indicate error
@@ -582,6 +587,7 @@ test("reports error for unquoted string in strict mode", () => {
 
 test("reports error with non-zero Status for invalid escape sequence", () => {
   const fj = new FlexJson();
+  fj.throwOnError = false;
   fj.DeserializeFlex('{"name": "test\\qinvalid"}'); // \q is not a valid escape
   assert.notStrictEqual(fj.Status, 0);
   // Status should be negative to indicate error
@@ -590,24 +596,28 @@ test("reports error with non-zero Status for invalid escape sequence", () => {
 
 test("reports error for unclosed string", () => {
   const fj = new FlexJson();
+  fj.throwOnError = false;
   fj.DeserializeFlex('{"name": "unclosed string}');
   assert.notStrictEqual(fj.Status, 0);
 });
 
 test("reports error for unclosed object", () => {
   const fj = new FlexJson();
+  fj.throwOnError = false;
   fj.DeserializeFlex('{"name": "John"');
   assert.notStrictEqual(fj.Status, 0);
 });
 
 test("reports error for unclosed array", () => {
   const fj = new FlexJson();
+  fj.throwOnError = false;
   fj.DeserializeFlex('["a", "b"');
   assert.notStrictEqual(fj.Status, 0);
 });
 
 test("reports error for truncated unicode escape", () => {
   const fj = new FlexJson();
+  fj.throwOnError = false;
   fj.DeserializeFlex('{"name": "test\\u00"}');
   assert.notStrictEqual(fj.Status, 0);
   assert.strictEqual(fj.Status < 0, true);
@@ -618,6 +628,63 @@ test("parses valid unicode escape sequences", () => {
   fj.DeserializeFlex('{"name": "test\\u0041"}'); // \u0041 = 'A'
   assert.strictEqual(fj.Status, 0);
   assert.strictEqual(fj.item("name").thisValue, "testA");
+});
+
+test("throwOnError=true throws FlexJsonError on parse error", () => {
+  const fj = new FlexJson();
+  fj.throwOnError = true; // default, but explicit for clarity
+  let threw = false;
+  let errorStatus = null;
+  try {
+    fj.Deserialize('{invalid!!!}');
+  } catch (err) {
+    threw = true;
+    errorStatus = err.status;
+    assert.strictEqual(err.name, "FlexJsonError");
+  }
+  assert.strictEqual(threw, true, "Should have thrown FlexJsonError");
+  assert.strictEqual(errorStatus < 0, true, "Error status should be negative");
+});
+
+test("throwOnError=false does not throw on parse error", () => {
+  const fj = new FlexJson();
+  fj.throwOnError = false;
+  let threw = false;
+  try {
+    fj.Deserialize('{invalid!!!}');
+  } catch (err) {
+    threw = true;
+  }
+  assert.strictEqual(threw, false, "Should not have thrown");
+  assert.notStrictEqual(fj.Status, 0, "Status should indicate error");
+});
+
+test("throwOnError=true throws on file read error", () => {
+  const fj = new FlexJson();
+  fj.throwOnError = true;
+  let threw = false;
+  let errorStatus = null;
+  try {
+    fj.DeserializeFlexFile('/nonexistent/path/file.jfx');
+  } catch (err) {
+    threw = true;
+    errorStatus = err.status;
+  }
+  assert.strictEqual(threw, true, "Should have thrown on file error");
+  assert.strictEqual(errorStatus, -32, "File error status should be -32");
+});
+
+test("throwOnError=false does not throw on file read error", () => {
+  const fj = new FlexJson();
+  fj.throwOnError = false;
+  let threw = false;
+  try {
+    fj.DeserializeFlexFile('/nonexistent/path/file.jfx');
+  } catch (err) {
+    threw = true;
+  }
+  assert.strictEqual(threw, false, "Should not have thrown");
+  assert.strictEqual(fj.Status, -32, "Status should indicate file error");
 });
 
 // ============================================================================

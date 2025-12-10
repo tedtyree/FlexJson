@@ -15,6 +15,7 @@
 - [How the library works](#how-the-library-works)
 - [Install](#install)
 - [Usage](#usage)
+- [Error Handling](#error-handling)
 - [JFX File Type](#jfx-file-type)
 - [Editor Support](#editor-support)
 
@@ -204,6 +205,47 @@ CounterA:1
 And each new time this is run the counter will increase…
 CounterA:2
 
+## Error Handling
+
+By default, FlexJson throws a `FlexJsonError` when parsing errors occur. This makes it easy to catch and handle errors using standard try/catch:
+
+```javascript
+const FlexJson = require('flex-json');
+
+try {
+  const fj = new FlexJson();
+  fj.DeserializeFlex('{invalid json!!!}');
+} catch (err) {
+  console.log(err.name);    // "FlexJsonError"
+  console.log(err.status);  // -159 (error code)
+  console.log(err.message); // "Invalid character..."
+}
+```
+
+### Silent Mode
+
+If you prefer the legacy behavior where errors don't throw (useful for validation scenarios), set `throwOnError` to `false`:
+
+```javascript
+const fj = new FlexJson();
+fj.throwOnError = false;  // Disable throwing
+
+fj.DeserializeFlex('{invalid json}');
+
+if (fj.Status !== 0) {
+  console.log('Parse failed:', fj.statusMsg);
+  console.log('Error code:', fj.Status);
+}
+```
+
+### Error Properties
+
+| Property | Description |
+|----------|-------------|
+| `Status` | Error code (0 = success, negative = error) |
+| `statusMsg` | Human-readable error message |
+| `throwOnError` | `true` (default) = throw errors, `false` = silent mode |
+
 ## JFX File Type
 
 FlexJson files can use the `.jfx` file extension to distinguish them from standard JSON files. This allows editors to provide proper syntax highlighting for FlexJson's extended features.
@@ -313,7 +355,6 @@ The Tree-sitter grammar in `extensions/tree-sitter-jfx/` can be used with any ed
 - Publish as a VS Code extension
 - Publish to Open VSX
 - Add/verify support for reading/writing to .jfx files
-- Revamp error handling
 
 ### Support
 
