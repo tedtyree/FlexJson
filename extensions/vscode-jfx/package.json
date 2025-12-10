@@ -1,0 +1,58 @@
+{
+  "name": "vscode-jfx",
+  "displayName": "JFX - FlexJson Language Support",
+  "description": "Syntax highlighting and language support for FlexJson (.jfx) files",
+  "version": "0.1.0",
+  "publisher": "flexjson",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tedtyree/FlexJson.git"
+  },
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "json",
+    "flexjson",
+    "jfx",
+    "config",
+    "comments"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "jfx",
+        "aliases": [
+          "FlexJson",
+          "JFX",
+          "jfx"
+        ],
+        "extensions": [
+          ".jfx"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/jfx-icon.png",
+          "dark": "./icons/jfx-icon.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jfx",
+        "scopeName": "source.jfx",
+        "path": "./syntaxes/jfx.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^2.22.0"
+  }
+}

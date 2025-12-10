@@ -1,0 +1,185 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "FlexJson",
+  "scopeName": "source.jfx",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#value" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.jfx",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.jfx",
+          "begin": "/\\*",
+          "end": "\\*/",
+          "captures": {
+            "0": { "name": "punctuation.definition.comment.jfx" }
+          }
+        }
+      ]
+    },
+    "value": {
+      "patterns": [
+        { "include": "#object" },
+        { "include": "#array" },
+        { "include": "#string-double" },
+        { "include": "#string-single" },
+        { "include": "#number" },
+        { "include": "#boolean" },
+        { "include": "#null" },
+        { "include": "#unquoted-string" }
+      ]
+    },
+    "object": {
+      "name": "meta.structure.dictionary.jfx",
+      "begin": "\\{",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.dictionary.begin.jfx" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.dictionary.end.jfx" }
+      },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#object-member" },
+        {
+          "name": "punctuation.separator.dictionary.pair.jfx",
+          "match": ","
+        }
+      ]
+    },
+    "object-member": {
+      "patterns": [
+        {
+          "name": "meta.structure.dictionary.key.jfx",
+          "begin": "(?=\\s*(?:\"[^\"]*\"|'[^']*'|[\\w$]+)\\s*:)",
+          "end": "(?<=:)|(?=[\\},])",
+          "patterns": [
+            { "include": "#comments" },
+            { "include": "#key-double-quoted" },
+            { "include": "#key-single-quoted" },
+            { "include": "#key-unquoted" },
+            {
+              "name": "punctuation.separator.dictionary.key-value.jfx",
+              "match": ":"
+            }
+          ]
+        },
+        {
+          "name": "meta.structure.dictionary.value.jfx",
+          "begin": "(?<=:)",
+          "end": "(?=[,\\}])",
+          "patterns": [
+            { "include": "#comments" },
+            { "include": "#value" }
+          ]
+        }
+      ]
+    },
+    "key-double-quoted": {
+      "name": "string.quoted.double.jfx support.type.property-name.jfx",
+      "begin": "\"",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.string.begin.jfx" }
+      },
+      "end": "\"",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.string.end.jfx" }
+      },
+      "patterns": [
+        { "include": "#string-escape" }
+      ]
+    },
+    "key-single-quoted": {
+      "name": "string.quoted.single.jfx support.type.property-name.jfx",
+      "begin": "'",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.string.begin.jfx" }
+      },
+      "end": "'",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.string.end.jfx" }
+      },
+      "patterns": [
+        { "include": "#string-escape" }
+      ]
+    },
+    "key-unquoted": {
+      "name": "support.type.property-name.jfx",
+      "match": "[\\w$][\\w$]*"
+    },
+    "array": {
+      "name": "meta.structure.array.jfx",
+      "begin": "\\[",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.array.begin.jfx" }
+      },
+      "end": "\\]",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.array.end.jfx" }
+      },
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#value" },
+        {
+          "name": "punctuation.separator.array.jfx",
+          "match": ","
+        }
+      ]
+    },
+    "string-double": {
+      "name": "string.quoted.double.jfx",
+      "begin": "\"",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.string.begin.jfx" }
+      },
+      "end": "\"",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.string.end.jfx" }
+      },
+      "patterns": [
+        { "include": "#string-escape" }
+      ]
+    },
+    "string-single": {
+      "name": "string.quoted.single.jfx",
+      "begin": "'",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.string.begin.jfx" }
+      },
+      "end": "'",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.string.end.jfx" }
+      },
+      "patterns": [
+        { "include": "#string-escape" }
+      ]
+    },
+    "string-escape": {
+      "name": "constant.character.escape.jfx",
+      "match": "\\\\(?:[\"\\\\/bfnrt']|u[0-9A-Fa-f]{4})"
+    },
+    "number": {
+      "name": "constant.numeric.jfx",
+      "match": "-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?"
+    },
+    "boolean": {
+      "name": "constant.language.boolean.jfx",
+      "match": "\\b(?:true|false)\\b"
+    },
+    "null": {
+      "name": "constant.language.null.jfx",
+      "match": "\\bnull\\b"
+    },
+    "unquoted-string": {
+      "name": "string.unquoted.jfx",
+      "match": "(?<=[:\\[,]\\s*|^\\s*)[\\w$][\\w$.-]*(?=\\s*[,\\]\\}]|\\s*$)"
+    }
+  }
+}

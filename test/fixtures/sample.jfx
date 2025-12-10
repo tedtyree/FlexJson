@@ -1,0 +1,38 @@
+/* Sample FlexJson Configuration File
+** Demonstrates all FlexJson features
+*/
+{
+  // Application metadata
+  appName: "My Application",
+  version: '1.0.0',
+  
+  // Database configuration
+  database: {
+    host: localhost,
+    port: 5432,
+    name: "app_db",
+    ssl: true
+  },
+  
+  /* Feature flags
+     Enable/disable application features */
+  features: {
+    'dark-mode': true,
+    beta: false,
+    experimental: null
+  },
+  
+  // Supported environments
+  environments: [
+    "development",
+    'staging',
+    production  // unquoted string
+  ],
+  
+  // Numeric values
+  settings: {
+    maxConnections: 100,
+    timeout: 30.5,
+    retryCount: 3
+  }
+}

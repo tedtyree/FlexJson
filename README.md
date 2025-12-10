@@ -15,6 +15,8 @@
 - [How the library works](#how-the-library-works)
 - [Install](#install)
 - [Usage](#usage)
+- [JFX File Type](#jfx-file-type)
+- [Editor Support](#editor-support)
 
 ## Why flex-json
 
@@ -201,6 +203,101 @@ CounterA:1
 
 And each new time this is run the counter will increase…
 CounterA:2
+
+## JFX File Type
+
+FlexJson files can use the `.jfx` file extension to distinguish them from standard JSON files. This allows editors to provide proper syntax highlighting for FlexJson's extended features.
+
+### Example `.jfx` file
+
+```jfx
+/* Application Configuration
+** Version 1.0
+*/
+{
+  // Database settings
+  database: {
+    host: localhost,
+    port: 5432,
+    name: "my-app-db"
+  },
+  
+  // Feature flags
+  features: {
+    'dark-mode': true,
+    beta: false
+  },
+  
+  logLevel: info  // unquoted string value
+}
+```
+
+### Reading `.jfx` files
+
+```javascript
+const FlexJson = require('flex-json');
+
+const config = new FlexJson();
+config.DeserializeFlexFile('config.jfx');
+
+console.log(config.getStr('database.host')); // "localhost"
+```
+
+## Editor Support
+
+The FlexJson library parses `.jfx` files at runtime, but your code editor needs a separate extension for syntax highlighting. Editor extensions are **not** installed automatically with `npm install`.
+
+### VS Code
+
+Install the **JFX - FlexJson Language Support** extension:
+
+**Option 1: From VSIX (manual install)**
+1. Download the `.vsix` file from [releases](https://github.com/tedtyree/FlexJson/releases)
+2. In VS Code, open Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
+3. Run `Extensions: Install from VSIX...`
+4. Select the downloaded `.vsix` file
+
+**Option 2: Build from source**
+```bash
+cd extensions/vscode-jfx
+npm install
+npm run package
+# Then install the generated .vsix file as above
+```
+
+The extension provides:
+- Syntax highlighting for `.jfx` files
+- Comment support (`//` and `/* */`)
+- Bracket matching and auto-closing
+- Code folding
+
+### Neovim (Tree-sitter)
+
+Add to your Tree-sitter configuration:
+
+```lua
+local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+parser_config.jfx = {
+  install_info = {
+    url = "https://github.com/tedtyree/FlexJson",
+    files = {"extensions/tree-sitter-jfx/src/parser.c"},
+    branch = "main",
+  },
+  filetype = "jfx",
+}
+
+vim.filetype.add({
+  extension = {
+    jfx = "jfx",
+  },
+})
+```
+
+Then run `:TSInstall jfx`
+
+### Other Editors
+
+The Tree-sitter grammar in `extensions/tree-sitter-jfx/` can be used with any editor that supports Tree-sitter (Emacs, Helix, Zed, etc.). See your editor's documentation for setup instructions.
 
 ### Contributing
 
