@@ -31,7 +31,7 @@ FlexJson is a JavaScript/Node.js library for working with JSON that needs a litt
 
 ## Why flex-json
 
-It is simply Json with comments! FlexJson was written to make JSON config files easy to manage and allow for comments. The library also makes it super easy to read a json file (often a config file), modify a single value, and save the file back to the file system without messing up the comments.
+It's Json with comments! Javascript style (and Python style) Json format. FlexJson was written to make JSON config files easy to manage and allow for comments. The library also makes it super easy to read a json file (often a config file), modify a single value, and save the file back to the file system without losing the comments or messing up the formatting.
 
 - Easy config file formatting
 - Includes comments in both /\*\*/ and // notation
@@ -159,19 +159,21 @@ Serialization and Deserialization examples
 ```javascript
 const FlexJson = require("flex-json");
 
-// Create an instance of FlexJson
-const flexJson = new FlexJson();
+const fj = new FlexJson();
+fj.DeserializeFlex('{ name: John, age: 30 }');
 
-// Example: Deserialize JSON
-const jsonString = '{"name": "John", "age": 30, "city": "New York"}';
-flexJson.Deserialize(jsonString);
+// jsonString — preserves flex formatting (comments, whitespace, original style)
+// Use this when writing back to a .jfx config file or keeping round-trip fidelity
+console.log(fj.jsonString);           // '{ name: John, age: 30 }'
 
-// Example: Serialize to JSON
-flexJson.SerializeMe();
+// Stringify() — always returns compact standard JSON, strips all flex metadata
+// Use this for API responses, JSON.parse(), or any standard JSON consumer
+console.log(fj.Stringify());          // '{"name":"John","age":30}'
 
-// Access serialized JSON string
-const serializedJson = flexJson.SerializeMe();
-console.log(serializedJson);
+// toNative() — converts to a plain JS object/array/primitive
+// Useful for passing to other libraries or further JS manipulation
+const native = fj.toNative();
+console.log(native);                  // { name: 'John', age: 30 }
 ```
 
 Config file example (this is the best part!)
