@@ -21,7 +21,7 @@
 
 ## Why flex-json
 
-It is simply Json with comments! FlexJson was written to make JSON config files easy to manage and allow for comments. The library also makes it super easy to read a json file (often a config file), modify a single value, and save the file back to the file system without messing up the comments.
+It's Json with comments! Javascript style (and Python style) Json format. FlexJson was written to make JSON config files easy to manage and allow for comments. The library also makes it super easy to read a json file (often a config file), modify a single value, and save the file back to the file system without losing the comments or messing up the formatting.
 
 - Easy config file formatting
 - Includes comments in both /* */ and // notation
