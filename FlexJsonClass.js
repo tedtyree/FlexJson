@@ -524,6 +524,31 @@ class FlexJson {
     }
   } // end forEach()
 
+  [Symbol.iterator]() {
+    if (this.jsonType == "object" || this.jsonType == "array") {
+      let idx = 0;
+      return {
+        next: () => {
+          if (idx < this.length) {
+            return { value: this.i(idx++), done: false };
+          }
+          return { value: undefined, done: true };
+        },
+      };
+    } else {
+      let done = false;
+      return {
+        next: () => {
+          if (!done) {
+            done = true;
+            return { value: this, done: false };
+          }
+          return { value: undefined, done: true };
+        },
+      };
+    }
+  } // end [Symbol.iterator]()
+
   // This replaces addToObjBase and addToArrayBase (if array, second argument is not needed)
   addToBase(value, idx = "") {
     this.add(value, idx, false);

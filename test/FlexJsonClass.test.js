@@ -422,6 +422,41 @@ test("forEach() iterates over array items", () => {
   assert.deepStrictEqual(values, [10, 20, 30]);
 });
 
+test("for...of iterates over object items", () => {
+  const fj = new FlexJson('{"a": 1, "b": 2, "c": 3}', true);
+  const values = [];
+  for (const node of fj) {
+    values.push(node.toNum());
+  }
+  assert.deepStrictEqual(values, [1, 2, 3]);
+});
+
+test("for...of iterates over array items", () => {
+  const fj = new FlexJson('[10, 20, 30]', true);
+  const values = [];
+  for (const node of fj) {
+    values.push(node.toNum());
+  }
+  assert.deepStrictEqual(values, [10, 20, 30]);
+});
+
+test("for...of on scalar yields itself once", () => {
+  const fj = new FlexJson('"hello"', true);
+  const results = [];
+  for (const node of fj) {
+    results.push(node.toStr());
+  }
+  assert.deepStrictEqual(results, ["hello"]);
+});
+
+test("spread operator works on object", () => {
+  const fj = new FlexJson('{"x": 1, "y": 2}', true);
+  const nodes = [...fj];
+  assert.strictEqual(nodes.length, 2);
+  assert.strictEqual(nodes[0].toNum(), 1);
+  assert.strictEqual(nodes[1].toNum(), 2);
+});
+
 test("ConvertToArray() converts object to array", () => {
   const fj = new FlexJson('{"a": 1, "b": 2}', true);
   assert.strictEqual(fj.jsonType, "object");
