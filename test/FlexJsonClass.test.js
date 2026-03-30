@@ -457,6 +457,50 @@ test("spread operator works on object", () => {
   assert.strictEqual(nodes[1].toNum(), 2);
 });
 
+test("toNative() converts object to plain JS object", () => {
+  const fj = new FlexJson('{"name": "John", "age": 30, "active": true}', true);
+  assert.deepStrictEqual(fj.toNative(), { name: "John", age: 30, active: true });
+});
+
+test("toNative() converts array to plain JS array", () => {
+  const fj = new FlexJson('[1, "two", true, null]', true);
+  assert.deepStrictEqual(fj.toNative(), [1, "two", true, null]);
+});
+
+test("toNative() converts nested objects", () => {
+  const fj = new FlexJson('{"a": {"b": 42}}', true);
+  assert.deepStrictEqual(fj.toNative(), { a: { b: 42 } });
+});
+
+test("toNative() returns primitive for scalar node", () => {
+  const fj = new FlexJson('"hello"', true);
+  assert.strictEqual(fj.toNative(), "hello");
+});
+
+test("toNative() returns null for null node", () => {
+  const fj = new FlexJson('null', true);
+  assert.strictEqual(fj.toNative(), null);
+});
+
+test("Stringify() returns compact standard JSON", () => {
+  const fj = new FlexJson();
+  fj.DeserializeFlex('{ name: John, age: 30 }');
+  assert.strictEqual(fj.Stringify(), '{"name":"John","age":30}');
+});
+
+test("Stringify() strips flex spacing and comments", () => {
+  const fj = new FlexJson();
+  fj.DeserializeFlex('{\n  // comment\n  name: John\n}');
+  assert.strictEqual(fj.Stringify(), '{"name":"John"}');
+});
+
+test("Stringify() output is valid for JSON.parse()", () => {
+  const fj = new FlexJson();
+  fj.DeserializeFlex('{a: 1, b: [2, 3], c: true}');
+  const parsed = JSON.parse(fj.Stringify());
+  assert.deepStrictEqual(parsed, { a: 1, b: [2, 3], c: true });
+});
+
 test("ConvertToArray() converts object to array", () => {
   const fj = new FlexJson('{"a": 1, "b": 2}', true);
   assert.strictEqual(fj.jsonType, "object");

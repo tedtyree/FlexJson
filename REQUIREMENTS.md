@@ -69,8 +69,11 @@ This makes FlexJson compatible with spread (`[...fj]`), destructuring, and all o
 - `DeserializeFlex(str)` — parse flex-format string
 - `DeserializeFile(path)` — read and parse a file (strict mode)
 - `DeserializeFlexFile(path, spacing?, comments?)` — read and parse a flex file, optionally preserving spacing/comments
-- `SerializeMe()` — serialize back to a JSON string
+- `SerializeMe()` — serialize back to a JSON string (returns status code; use `jsonString` to get the string)
+- `jsonString` — property returning the serialized string; triggers `SerializeMe()` if needed
 - `WriteToFile(path)` — write serialized output to file system
+- `Stringify()` — always returns compact standard JSON (strips all flex metadata); use for API responses and any standard JSON consumer. To preserve flex formatting, use `jsonString` instead.
+- `toNative()` — convert the FlexJson tree to a plain JavaScript value (`object`, `Array`, or primitive); used internally by `Stringify()` and available for direct use
 
 ### 7. Error Handling
 

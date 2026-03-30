@@ -1796,6 +1796,38 @@ class FlexJson {
   // WriteToFile()
   // If object is setup as FlexJSON and with KeepSpacing/KeepComments, then file will be written accordingly
   // Return: 0=ok, -1=error, -2=could not write because of invalid FlexJson object
+  /**
+   * Convert this FlexJson node to a plain JavaScript value (object, Array, or primitive).
+   * Useful for interop with other libraries or passing to JSON.stringify().
+   * For a JSON string output, use Stringify() instead.
+   * @returns {object|Array|string|number|boolean|null}
+   */
+  toNative() {
+    if (!this.ValidateValue()) return null;
+    if (this._jsonType === "object") {
+      const obj = {};
+      for (const child of this._value) {
+        obj[child._key] = child.toNative();
+      }
+      return obj;
+    }
+    if (this._jsonType === "array") {
+      return this._value.map((child) => child.toNative());
+    }
+    if (this._jsonType === "null") return null;
+    return this._value;
+  } // end toNative()
+
+  /**
+   * Serialize to a compact, standard JSON string — strips all flex metadata (comments, spacing).
+   * Safe for API responses, JSON.parse(), and any standard JSON consumer.
+   * To preserve flex formatting (comments, whitespace), use the jsonString property instead.
+   * @returns {string}
+   */
+  Stringify() {
+    return JSON.stringify(this.toNative());
+  } // end Stringify()
+
   WriteToFile(FilePath) {
     try {
       let outString = this.jsonString;
