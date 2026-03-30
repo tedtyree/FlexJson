@@ -1,10 +1,8 @@
 # flex-json
 
-> A comment-friendly JSON parser/editor that keeps your config files readable.
+Flex-json is an extended version of json that allows for comments and JS like formatting that is human readable and simplified. Also, edit Json files that have specific spacing and comments without losing the spacing and comments!.
 
-FlexJson is a JavaScript/Node.js library for working with JSON that needs a little extra flexibility—think config files, feature flags, and content blobs that humans still need to read. It understands JavaScript-style comments, mixed quoting, and loosely formatted values, while still giving you a rich API for traversing and editing data without destroying the original layout.
-
-### Highlights
+## Highlights
 
 - **Comment aware:** Parses `//` and `/* */` comments so you can document configs without breaking JSON.
 - **Format preserving:** Keeps whitespace, indentation, and ordering intact when you round-trip files.
@@ -160,20 +158,20 @@ Serialization and Deserialization examples
 const FlexJson = require("flex-json");
 
 const fj = new FlexJson();
-fj.DeserializeFlex('{ name: John, age: 30 }');
+fj.DeserializeFlex("{ name: John, age: 30 }");
 
 // jsonString — preserves flex formatting (comments, whitespace, original style)
 // Use this when writing back to a .jfx config file or keeping round-trip fidelity
-console.log(fj.jsonString);           // '{ name: John, age: 30 }'
+console.log(fj.jsonString); // '{ name: John, age: 30 }'
 
 // Stringify() — always returns compact standard JSON, strips all flex metadata
 // Use this for API responses, JSON.parse(), or any standard JSON consumer
-console.log(fj.Stringify());          // '{"name":"John","age":30}'
+console.log(fj.Stringify()); // '{"name":"John","age":30}'
 
 // toNative() — converts to a plain JS object/array/primitive
 // Useful for passing to other libraries or further JS manipulation
 const native = fj.toNative();
-console.log(native);                  // { name: 'John', age: 30 }
+console.log(native); // { name: 'John', age: 30 }
 ```
 
 Config file example (this is the best part!)
