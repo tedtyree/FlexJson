@@ -960,6 +960,152 @@ test("handles single quotes inside double-quoted string", () => {
 });
 
 // ============================================================================
+// at() TESTS
+// ============================================================================
+section("at()");
+
+test("at(0) returns first element of array", () => {
+  const fj = new FlexJson('["a", "b", "c"]', true);
+  assert.strictEqual(fj.at(0).thisValue, "a");
+});
+
+test("at(n) returns nth element of array", () => {
+  const fj = new FlexJson('["a", "b", "c"]', true);
+  assert.strictEqual(fj.at(1).thisValue, "b");
+  assert.strictEqual(fj.at(2).thisValue, "c");
+});
+
+test("at(-1) returns last element of array", () => {
+  const fj = new FlexJson('["a", "b", "c"]', true);
+  assert.strictEqual(fj.at(-1).thisValue, "c");
+});
+
+test("at(-2) returns second-to-last element of array", () => {
+  const fj = new FlexJson('["a", "b", "c"]', true);
+  assert.strictEqual(fj.at(-2).thisValue, "b");
+});
+
+test("at() on object uses positional order", () => {
+  const fj = new FlexJson('{"x": 1, "y": 2, "z": 3}', true);
+  assert.strictEqual(fj.at(0).thisValue, 1);
+  assert.strictEqual(fj.at(-1).thisValue, 3);
+});
+
+test("at() returns undefined for out-of-range positive index", () => {
+  const fj = new FlexJson('["a", "b"]', true);
+  assert.strictEqual(fj.at(5), undefined);
+});
+
+test("at() returns undefined for out-of-range negative index", () => {
+  const fj = new FlexJson('["a", "b"]', true);
+  assert.strictEqual(fj.at(-5), undefined);
+});
+
+test("at() returns undefined on empty array", () => {
+  const fj = new FlexJson('[]', true);
+  assert.strictEqual(fj.at(0), undefined);
+  assert.strictEqual(fj.at(-1), undefined);
+});
+
+test("at(0) on scalar returns the node itself", () => {
+  const fj = new FlexJson('"hello"', true);
+  assert.strictEqual(fj.at(0), fj);
+});
+
+test("at(-1) on scalar returns the node itself", () => {
+  const fj = new FlexJson('42', true);
+  assert.strictEqual(fj.at(-1), fj);
+});
+
+test("at(1) on scalar returns undefined", () => {
+  const fj = new FlexJson('"hello"', true);
+  assert.strictEqual(fj.at(1), undefined);
+});
+
+// ============================================================================
+// entries() TESTS
+// ============================================================================
+section("entries()");
+
+test("entries() on array yields numeric index + node pairs", () => {
+  const fj = new FlexJson('["x", "y", "z"]', true);
+  const result = [];
+  for (const [key, node] of fj.entries()) {
+    result.push([key, node.thisValue]);
+  }
+  assert.deepStrictEqual(result, [[0, "x"], [1, "y"], [2, "z"]]);
+});
+
+test("entries() array keys are numbers", () => {
+  const fj = new FlexJson('["a", "b"]', true);
+  for (const [key] of fj.entries()) {
+    assert.strictEqual(typeof key, "number");
+  }
+});
+
+test("entries() on object yields string key + node pairs", () => {
+  const fj = new FlexJson('{"name": "John", "age": 30}', true);
+  const result = [];
+  for (const [key, node] of fj.entries()) {
+    result.push([key, node.thisValue]);
+  }
+  assert.deepStrictEqual(result, [["name", "John"], ["age", 30]]);
+});
+
+test("entries() object keys are strings", () => {
+  const fj = new FlexJson('{"a": 1, "b": 2}', true);
+  for (const [key] of fj.entries()) {
+    assert.strictEqual(typeof key, "string");
+  }
+});
+
+test("entries() on scalar yields [0, node] once", () => {
+  const fj = new FlexJson('"hello"', true);
+  const result = [];
+  for (const [key, node] of fj.entries()) {
+    result.push([key, node.thisValue]);
+  }
+  assert.deepStrictEqual(result, [[0, "hello"]]);
+  assert.strictEqual(result[0][1], fj.thisValue);
+});
+
+test("entries() on empty array yields nothing", () => {
+  const fj = new FlexJson('[]', true);
+  const result = [...fj.entries()];
+  assert.strictEqual(result.length, 0);
+});
+
+test("entries() on empty object yields nothing", () => {
+  const fj = new FlexJson('{}', true);
+  const result = [...fj.entries()];
+  assert.strictEqual(result.length, 0);
+});
+
+test("entries() iterator is reusable via for...of", () => {
+  const fj = new FlexJson('{"a": 1, "b": 2}', true);
+  const keys = [];
+  for (const [key] of fj.entries()) {
+    keys.push(key);
+  }
+  assert.deepStrictEqual(keys, ["a", "b"]);
+});
+
+test("entries() values are FlexJson nodes", () => {
+  const fj = new FlexJson('[10, 20]', true);
+  for (const [, node] of fj.entries()) {
+    assert.strictEqual(node.constructor.name, "FlexJson");
+  }
+});
+
+test("entries() collected with Array.from()", () => {
+  const fj = new FlexJson('{"x": 1, "y": 2}', true);
+  const pairs = Array.from(fj.entries());
+  assert.strictEqual(pairs.length, 2);
+  assert.strictEqual(pairs[0][0], "x");
+  assert.strictEqual(pairs[1][0], "y");
+});
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 console.log("\n" + "=".repeat(50));

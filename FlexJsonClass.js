@@ -549,6 +549,46 @@ class FlexJson {
     }
   } // end [Symbol.iterator]()
 
+  /**
+   * Returns the element at the given index, supporting negative indices.
+   * Mirrors Array.prototype.at()
+   * @param {number} n - Index (negative counts from end)
+   * @returns {FlexJson|undefined}
+   */
+  at(n) {
+    if (this.jsonType !== "object" && this.jsonType !== "array") {
+      return n === 0 || n === -1 ? this : undefined;
+    }
+    const len = this.length;
+    const idx = n < 0 ? len + n : n;
+    if (idx < 0 || idx >= len) return undefined;
+    return this.i(idx);
+  }
+
+  /**
+   * Returns an iterator of [key, value] pairs.
+   * For objects: [key, FlexJson]. For arrays: [index, FlexJson].
+   * Mirrors Array.prototype.entries() / Object.entries() semantics.
+   * @returns {Iterator}
+   */
+  entries() {
+    const isObject = this.jsonType === "object";
+    const isCollection = isObject || this.jsonType === "array";
+    let idx = 0;
+    const self = this;
+    return {
+      [Symbol.iterator]() { return this; },
+      next() {
+        if (isCollection ? idx < self.length : idx === 0) {
+          const i = idx++;
+          const child = isCollection ? self.i(i) : self;
+          return { value: [isObject ? child.key : i, child], done: false };
+        }
+        return { value: undefined, done: true };
+      }
+    };
+  }
+
   // This replaces addToObjBase and addToArrayBase (if array, second argument is not needed)
   addToBase(value, idx = "") {
     this.add(value, idx, false);

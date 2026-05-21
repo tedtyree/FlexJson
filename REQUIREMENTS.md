@@ -63,6 +63,16 @@ for (const node of myFlexJson) {
 
 This makes FlexJson compatible with spread (`[...fj]`), destructuring, and all other JS iteration consumers.
 
+### 5b. Array-Protocol Methods (`at()`, `entries()`)
+
+FlexJson exposes two additional iteration helpers that mirror standard JavaScript array/object protocols:
+
+- **`at(n)`** — returns the child at index `n`; negative values count from the end (`at(-1)` = last element). Returns `undefined` if out of range. On scalar nodes (string, number, boolean, null), `at(0)` and `at(-1)` return the node itself.
+- **`entries()`** — returns an iterator of `[key, child]` pairs. For object nodes the key is the string key name; for array nodes it is the numeric index. On scalar nodes yields one pair: `[0, this]`.
+
+**Design decision — `i()` does not support negative indices.**
+`i()` / `item()` is the general-purpose internal accessor used throughout the class (by `add()`, `contains()`, `getStr()`, the iterators, etc.). It currently returns `null` for out-of-range values including negative numbers; callers may rely on that as an error sentinel. Negative-index support is intentionally provided only through `at()`, which makes the intent explicit and avoids a silent breaking change to the core lookup method.
+
 ### 6. Serialization / Deserialization
 
 - `Deserialize(str)` — parse standard JSON string
