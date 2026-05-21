@@ -1,13 +1,21 @@
 # flex-json
 
-## Flexible JSON manipulation library for JavaScript
+Flex-json is an extended version of json that allows for comments and JS like formatting that is human readable and simplified. Also, edit Json files that have specific spacing and comments without losing the spacing and comments!.
+
+## Highlights
+
+- **Comment aware:** Parses `//` and `/* */` comments so you can document configs without breaking JSON.
+- **Format preserving:** Keeps whitespace, indentation, and ordering intact when you round-trip files.
+- **Editor-friendly API:** Navigate with `.i()`, `.item()`, `.forEach()`, `getStr/getNum/getBool`, and more.
+- **File utilities:** Read/write straight from `.json` or `.jfx` files with `DeserializeFlexFile` and `WriteToFile`.
+- **Strict or flex modes:** Opt into vanilla JSON parsing when you need it, or turn on the relaxed syntax.
 
 ## Maintainers
 
-| Maintainer      | GitHub                                      | LinkedIn                                               |
-| --------------- | ------------------------------------------- | ------------------------------------------------------ |
-| Ted Tyree       | [GitHub](https://github.com/tedtyree)       |[LinkedIn](https://www.linkedin.com/in/tedtyree/)       |  
-| Michael Njuguna | [GitHub](https://github.com/michaelnjuguna) |[LinkedIn](https://www.linkedin.com/in/michael-njuguna/)|
+| Maintainer      | GitHub                                      | LinkedIn                                                 |
+| --------------- | ------------------------------------------- | -------------------------------------------------------- |
+| Ted Tyree       | [GitHub](https://github.com/tedtyree)       | [LinkedIn](https://www.linkedin.com/in/tedtyree/)        |
+| Michael Njuguna | [GitHub](https://github.com/michaelnjuguna) | [LinkedIn](https://www.linkedin.com/in/michael-njuguna/) |
 
 ## Table of Contents
 
@@ -24,7 +32,7 @@
 It's Json with comments! Javascript style (and Python style) Json format. FlexJson was written to make JSON config files easy to manage and allow for comments. The library also makes it super easy to read a json file (often a config file), modify a single value, and save the file back to the file system without losing the comments or messing up the formatting.
 
 - Easy config file formatting
-- Includes comments in both /* */ and // notation
+- Includes comments in both /\*\*/ and // notation
 - Simple to edit Json files
 - Allows for other JavaScript like features such as using either single quotes or double quotes.
 - Can also be used within Node.js apps for other uses such as reading/writing JSON to/from database records and parsing loosely formatted Json in web page content.
@@ -45,23 +53,23 @@ Note: If the library is flagged to preserve spacing, Json that has been read in 
 
 When in flex mode, the flex-json library has the following features:
 
-- Like JavaScript, comments can be surrounded by  /* (start of comment) and */ (end of comment)
+- Like JavaScript, comments can be surrounded by /_(start of comment) and_/ (end of comment)
 
-- Like JavaScript, when a  "//" is encountered, the remainder of the line is considered to be a comment
+- Like JavaScript, when a "//" is encountered, the remainder of the line is considered to be a comment
 
 - Strings do not require quotes unless they contain special characters
 
 - Strings can be quoted using double quotes or single quotes
-  
+
 When in flex mode, all of the following examples of Json are valid:
 
-__example 1:__
+**example 1:**
 
 ```javascript
 {apple: red, banana: yellow, 'sky': 'blue'}
 ```
 
-__example 2:__
+**example 2:**
 
 ```javascript
 {"apple": "red"
@@ -70,19 +78,20 @@ __example 2:__
 }
 ```
 
-__example 3:__
+**example 3:**
 
 ```javascript
-[ "one, is first"
-  ,'two, is next'
+[
+  "one, is first",
+  "two, is next",
   /* comment out remainder of array
   ,"three, is third"
   ,'four', is last"
   */
-]
+];
 ```
 
-__Note__ that {number:"2"} is not the same as {number:2} because flex-json will see that the 2 without quotes is a valid number and load it as a numeric.
+**Note** that {number:"2"} is not the same as {number:2} because flex-json will see that the 2 without quotes is a valid number and load it as a numeric.
 
 ## Install
 
@@ -101,7 +110,7 @@ Yarn install flex-json
 ## Usage
 
 ```javascript
-const  FlexJson  = require('flex-json');
+const FlexJson = require("flex-json");
 
 // Create a FlexJson object
 const myJson = new FlexJson('{"key": "value"}', true);
@@ -117,7 +126,7 @@ console.log(myJson.Status); // Get status
 console.log(myJson.jsonType); // Get JSON type
 
 // Manipulate JSON object
-myJson.i('key').thisValue = 'new value'; // Set a new value for a key
+myJson.i("key").thisValue = "new value"; // Set a new value for a key
 
 // Convert JSON object to array
 myJson.ConvertToArray();
@@ -126,22 +135,21 @@ myJson.ConvertToArray();
 console.log(myJson.item(0).thisValue); // Access first element in the array
 
 // Use new methods
-myJson.forEach(item => {
-    console.log(item.jsonString); // Iterate through each item and log JSON string
+myJson.forEach((item) => {
+  console.log(item.jsonString); // Iterate through each item and log JSON string
 });
 
-myJson.add('new item', 'newKey'); // Add a new item to the JSON object
+myJson.add("new item", "newKey"); // Add a new item to the JSON object
 
-console.log(myJson.indexOfKey('newKey')); // Get the index of a key in the JSON object
+console.log(myJson.indexOfKey("newKey")); // Get the index of a key in the JSON object
 
-console.log(myJson.contains('key')); // Check if a key exists in the JSON object
+console.log(myJson.contains("key")); // Check if a key exists in the JSON object
 
-console.log(myJson.getStr('key', 'default')); // Get string value by key with a default value
+console.log(myJson.getStr("key", "default")); // Get string value by key with a default value
 
-console.log(myJson.getNum('count', 0)); // Get numeric value by key with a default value
+console.log(myJson.getNum("count", 0)); // Get numeric value by key with a default value
 
-console.log(myJson.getBool('flag', false)); // Get boolean value by key with a default value
-
+console.log(myJson.getBool("flag", false)); // Get boolean value by key with a default value
 ```
 
 Serialization and Deserialization examples
@@ -150,25 +158,26 @@ Serialization and Deserialization examples
 const FlexJson = require("flex-json");
 
 const fj = new FlexJson();
-fj.DeserializeFlex('{ name: John, age: 30 }');
+fj.DeserializeFlex("{ name: John, age: 30 }");
 
 // jsonString — preserves flex formatting (comments, whitespace, original style)
 // Use this when writing back to a .jfx config file or keeping round-trip fidelity
-console.log(fj.jsonString);           // '{ name: John, age: 30 }'
+console.log(fj.jsonString); // '{ name: John, age: 30 }'
 
 // Stringify() — always returns compact standard JSON, strips all flex metadata
 // Use this for API responses, JSON.parse(), or any standard JSON consumer
-console.log(fj.Stringify());          // '{"name":"John","age":30}'
+console.log(fj.Stringify()); // '{"name":"John","age":30}'
 
 // toNative() — converts to a plain JS object/array/primitive
 // Useful for passing to other libraries or further JS manipulation
 const native = fj.toNative();
-console.log(native);                  // { name: 'John', age: 30 }
+console.log(native); // { name: 'John', age: 30 }
 ```
 
 Config file example (this is the best part!)
 
 First create a json config file for example a text file c:/temp/my-config.json containing the following text…
+
 ```javascript
 /* my-config
 ** this is an example of parsing
@@ -193,9 +202,9 @@ myConfig.DeserializeFlexFile(myConfigPath);
 
 // read CounterA and increment it by 1
 // use default value to create CounterA if it does not exist
-let counter = myConfig.getNum("CounterA",defaultCounter);
+let counter = myConfig.getNum("CounterA", defaultCounter);
 counter = counter + 1;
-myConfig.add(counter,"CounterA");
+myConfig.add(counter, "CounterA");
 
 // write config file back to file system
 myConfig.WriteToFile(myConfigPath);
@@ -212,14 +221,14 @@ CounterA:2
 By default, FlexJson throws a `FlexJsonError` when parsing errors occur. This makes it easy to catch and handle errors using standard try/catch:
 
 ```javascript
-const FlexJson = require('flex-json');
+const FlexJson = require("flex-json");
 
 try {
   const fj = new FlexJson();
-  fj.DeserializeFlex('{invalid json!!!}');
+  fj.DeserializeFlex("{invalid json!!!}");
 } catch (err) {
-  console.log(err.name);    // "FlexJsonError"
-  console.log(err.status);  // -159 (error code)
+  console.log(err.name); // "FlexJsonError"
+  console.log(err.status); // -159 (error code)
   console.log(err.message); // "Invalid character..."
 }
 ```
@@ -230,22 +239,22 @@ If you prefer the legacy behavior where errors don't throw (useful for validatio
 
 ```javascript
 const fj = new FlexJson();
-fj.throwOnError = false;  // Disable throwing
+fj.throwOnError = false; // Disable throwing
 
-fj.DeserializeFlex('{invalid json}');
+fj.DeserializeFlex("{invalid json}");
 
 if (fj.Status !== 0) {
-  console.log('Parse failed:', fj.statusMsg);
-  console.log('Error code:', fj.Status);
+  console.log("Parse failed:", fj.statusMsg);
+  console.log("Error code:", fj.Status);
 }
 ```
 
 ### Error Properties
 
-| Property | Description |
-|----------|-------------|
-| `Status` | Error code (0 = success, negative = error) |
-| `statusMsg` | Human-readable error message |
+| Property       | Description                                            |
+| -------------- | ------------------------------------------------------ |
+| `Status`       | Error code (0 = success, negative = error)             |
+| `statusMsg`    | Human-readable error message                           |
 | `throwOnError` | `true` (default) = throw errors, `false` = silent mode |
 
 ## JFX File Type
@@ -265,13 +274,13 @@ FlexJson files can use the `.jfx` file extension to distinguish them from standa
     port: 5432,
     name: "my-app-db"
   },
-  
+
   // Feature flags
   features: {
     'dark-mode': true,
     beta: false
   },
-  
+
   logLevel: info  // unquoted string value
 }
 ```
@@ -279,12 +288,12 @@ FlexJson files can use the `.jfx` file extension to distinguish them from standa
 ### Reading `.jfx` files
 
 ```javascript
-const FlexJson = require('flex-json');
+const FlexJson = require("flex-json");
 
 const config = new FlexJson();
-config.DeserializeFlexFile('config.jfx');
+config.DeserializeFlexFile("config.jfx");
 
-console.log(config.getStr('database.host')); // "localhost"
+console.log(config.getStr("database.host")); // "localhost"
 ```
 
 ## Editor Support
@@ -296,12 +305,14 @@ The FlexJson library parses `.jfx` files at runtime, but your code editor needs 
 Install the **JFX - FlexJson Language Support** extension:
 
 **Option 1: From VSIX (manual install)**
+
 1. Download the `.vsix` file from [releases](https://github.com/tedtyree/FlexJson/releases)
 2. In VS Code, open Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
 3. Run `Extensions: Install from VSIX...`
 4. Select the downloaded `.vsix` file
 
 **Option 2: Build from source**
+
 ```bash
 cd extensions/vscode-jfx
 npm install
@@ -310,6 +321,7 @@ npm run package
 ```
 
 The extension provides:
+
 - Syntax highlighting for `.jfx` files
 - Comment support (`//` and `/* */`)
 - Bracket matching and auto-closing
@@ -353,6 +365,7 @@ The Tree-sitter grammar in `extensions/tree-sitter-jfx/` can be used with any ed
 6. Create pull request.
 
 ### Backlog
+
 - Add support for """ and ''' multi-line quotes
 - Publish as a VS Code extension
 - Publish to Open VSX
@@ -368,4 +381,3 @@ Special thanks to [un0.org](https://un0.org/) and [eBiashara Rahisi Ltd](https:/
 ### License
 
 [MIT](LICENSE.txt)
-
