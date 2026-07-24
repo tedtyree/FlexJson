@@ -613,8 +613,18 @@ class FlexJson {
     if (this._jsonType == "object") {
       let foundItem = this.i(idx, dotNotation);
       if (foundItem.Parent) {
-        // Item exists... replace the value
-        foundItem.thisValue = value; // this also sets jsonType
+        // Item exists... replace the value (use newV, which already correctly
+        // handles the case where `value` is itself a FlexJson instance)
+        foundItem._jsonType = newV._jsonType;
+        foundItem._value = newV._value;
+        foundItem._value_valid = newV._value_valid;
+        foundItem._status = newV._status;
+        if (Array.isArray(foundItem._value)) {
+          for (const child of foundItem._value) {
+            child.Parent = foundItem;
+          }
+        }
+        foundItem.InvalidateJsonString(); // this also invalidates jsonString on `this` via Parent chain
         this.InvalidateJsonString(); // indicate that the JsonString has changed.
       } else {
         this.InvalidateJsonString(); // indicate that the JsonString has changed.
@@ -777,6 +787,49 @@ class FlexJson {
     j._jsonString = "null";
     j._jsonString_valid = true;
     j._status = 0;
+    return j;
+  }
+
+  /** Convert a native JS array into a FlexJson array node (recursively converts each element) */
+  static FromNativeArray(arr) {
+    let j = new FlexJson();
+    j._jsonType = "array";
+    j._value = arr.map((el) => {
+      let child = FlexJson.FromNative(el);
+      child.Parent = j;
+      child.key = "";
+      return child;
+    });
+    j._value_valid = true;
+    j._status = 0;
+    return j;
+  }
+
+  /** Convert a native JS object (plain key/value map) into a FlexJson object node (recursively converts each value) */
+  static FromNativeObject(obj) {
+    let j = new FlexJson();
+    j._jsonType = "object";
+    j._value = Object.entries(obj).map(([k, v]) => {
+      let child = FlexJson.FromNative(v);
+      child.Parent = j;
+      child.key = k;
+      return child;
+    });
+    j._value_valid = true;
+    j._status = 0;
+    return j;
+  }
+
+  /** Convert any native JS value (primitive, array, or plain object) into the appropriate FlexJson node */
+  static FromNative(value) {
+    if (value === null) return FlexJson.CreateNull();
+    if (Array.isArray(value)) return FlexJson.FromNativeArray(value);
+    if (typeof value === "object") {
+      if (value.constructor && value.constructor.name === "FlexJson") return value; // already FlexJson
+      return FlexJson.FromNativeObject(value);
+    }
+    let j = new FlexJson();
+    j.thisValue = value; // primitives already work correctly today
     return j;
   }
 

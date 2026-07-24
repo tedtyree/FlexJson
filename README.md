@@ -7,6 +7,7 @@ Flex-json is an extended version of json that allows for comments and JS like fo
 - **Comment aware:** Parses `//` and `/* */` comments so you can document configs without breaking JSON.
 - **Format preserving:** Keeps whitespace, indentation, and ordering intact when you round-trip files.
 - **Editor-friendly API:** Navigate with `.i()`, `.item()`, `.forEach()`, `getStr/getNum/getBool`, and more.
+- **Native conversion helpers:** Turn a plain JS array/object into a real FlexJson tree with `FlexJson.FromNativeArray()` / `FromNativeObject()` / `FromNative()` when you need to hand `add()` something built outside FlexJson (e.g. a value straight from an API request body).
 - **File utilities:** Read/write straight from `.json` or `.jfx` files with `DeserializeFlexFile` and `WriteToFile`.
 - **Strict or flex modes:** Opt into vanilla JSON parsing when you need it, or turn on the relaxed syntax.
 
@@ -23,6 +24,7 @@ Flex-json is an extended version of json that allows for comments and JS like fo
 - [How the library works](#how-the-library-works)
 - [Install](#install)
 - [Usage](#usage)
+- [Converting Native JS Values](#converting-native-js-values)
 - [Error Handling](#error-handling)
 - [JFX File Type](#jfx-file-type)
 - [Editor Support](#editor-support)
@@ -215,6 +217,30 @@ CounterA:1
 
 And each new time this is run the counter will increase…
 CounterA:2
+
+## Converting Native JS Values
+
+FlexJson's model is "you build FlexJson trees" — `add()` and `thisValue` accept primitives (string, number, boolean, null) or another `FlexJson` node, but **not** a raw native JS array or plain object. Passing one in directly is treated as an invalid type, not auto-converted — this is intentional, not a gap to code around.
+
+If you have a plain JS array/object (e.g. parsed from a request body) that you want to insert or use to replace an existing key, convert it first:
+
+```javascript
+const FlexJson = require("flex-json");
+
+const jfx = new FlexJson();
+jfx.DeserializeFlexFile("post.jfx");
+
+// Replace an existing array-typed field with a native array
+jfx.add(FlexJson.FromNativeArray(["#leadership", "#community"]), "category");
+
+// Replace/insert an object-typed field with a native object
+jfx.add(FlexJson.FromNativeObject({ excerpt: "...", authorRole: "..." }), "eng");
+
+// Or let FlexJson pick the right conversion for you (handles nested arrays/objects too)
+jfx.add(FlexJson.FromNative(someValueOfUnknownShape), "someKey");
+
+jfx.WriteToFile("post.jfx");
+```
 
 ## Error Handling
 

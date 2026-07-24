@@ -42,10 +42,25 @@ FlexJson is a JavaScript library for parsing, manipulating, and serializing JSON
 
 ### 5. Data Mutation API
 
-- `add(value, key)` — add or update a key/value; supports dot notation paths
+- `add(value, key)` — add or update a key/value; supports dot notation paths.
+  - `value` may be a primitive (string, number, boolean, null) or an existing `FlexJson` node (object, array, or scalar) — **not** a raw native JS array or plain object (see [5c](#5c-native-value-conversion)).
+  - Replacing an **existing** key must preserve the full type/value of whatever `value` resolves to — including object and array nodes, not just primitives. (Historical note: an earlier implementation re-derived the type from the raw `value` on replace instead of reusing the already-typed node, which silently corrupted array/object replacements — fixed; regression-covered by the "replace existing key with array/object" case.)
 - `ConvertToArray()` — convert an object node to an array
-- `thisValue` — directly set the value on a node
+- `thisValue` — directly set the value on a node. Accepts primitives or a `FlexJson` node only — **does not** accept a native JS array/object (`convertType()` treats these as an invalid type by design; see [5c](#5c-native-value-conversion) for the supported way to build a node from one).
 - `Clear()` — reset the node
+
+### 5c. Native Value Conversion
+
+FlexJson's data model is "you build FlexJson trees," not "assign native JS values and have them silently absorbed." A raw JS array or plain object passed to `thisValue` (directly, or indirectly through `add()`) is intentionally treated as an invalid type — it is not auto-converted. To convert a native structure into a proper FlexJson tree first, use:
+
+- **`FlexJson.FromNativeArray(arr)`** — converts a native JS array into a FlexJson array node, recursively converting each element.
+- **`FlexJson.FromNativeObject(obj)`** — converts a native JS plain object into a FlexJson object node, recursively converting each value.
+- **`FlexJson.FromNative(value)`** — dispatches by type: `null` → `CreateNull()`, array → `FromNativeArray()`, plain object → `FromNativeObject()`, existing `FlexJson` instance → returned as-is, primitive → wrapped via `thisValue`.
+
+```javascript
+// Replace an existing array-typed field with a new native array
+jfx.add(FlexJson.FromNativeArray(["#leadership", "#community"]), "category");
+```
 
 ### 5a. Native Iteration (Symbol.iterator)
 

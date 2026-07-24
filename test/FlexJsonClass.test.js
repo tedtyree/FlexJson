@@ -371,6 +371,168 @@ test("add() appends to array", () => {
   assert.strictEqual(fj.item(2).thisValue, "c");
 });
 
+// ---------------------------------------------------------------------------
+// add() replacing an existing key with a FlexJson array/object node
+// (regression: replace branch used to re-derive type from the raw `value`
+// instead of reusing the already-typed `newV`, which corrupted the node
+// into jsonType "error" and cascaded into a whole-file WriteToFile failure)
+// ---------------------------------------------------------------------------
+
+test("add() replacing existing key with a FlexJson array node preserves array type/value", () => {
+  const fj = new FlexJson('{"tags": ["old"]}', true);
+  fj.add(FlexJson.FromNativeArray(["a", "b", "c"]), "tags");
+  assert.strictEqual(fj.item("tags").jsonType, "array");
+  assert.strictEqual(fj.item("tags").length, 3);
+  assert.strictEqual(fj.item("tags").item(0).thisValue, "a");
+  assert.strictEqual(fj.item("tags").item(2).thisValue, "c");
+});
+
+test("add() replacing existing key with a FlexJson object node preserves object type/value", () => {
+  const fj = new FlexJson('{"meta": {"old": 1}}', true);
+  fj.add(FlexJson.FromNativeObject({ excerpt: "hi", authorRole: "editor" }), "meta");
+  assert.strictEqual(fj.item("meta").jsonType, "object");
+  assert.strictEqual(fj.item("meta").getStr("excerpt"), "hi");
+  assert.strictEqual(fj.item("meta").getStr("authorRole"), "editor");
+});
+
+test("add() replacing existing key with array node round-trips through jsonString", () => {
+  const fj = new FlexJson('{"tags": ["old"]}', true);
+  fj.add(FlexJson.FromNativeArray(["x", "y"]), "tags");
+  const json = fj.jsonString;
+  assert.strictEqual(json.includes('"x"'), true);
+  assert.strictEqual(json.includes('"y"'), true);
+  assert.strictEqual(json.includes('"old"'), false);
+});
+
+test("add() replacing existing key with array node keeps Status 0 (no corruption)", () => {
+  const fj = new FlexJson('{"tags": ["old"]}', true);
+  fj.add(FlexJson.FromNativeArray(["a"]), "tags");
+  assert.strictEqual(fj.Status, 0);
+  assert.notStrictEqual(fj.item("tags").jsonType, "error");
+});
+
+test("WriteToFile() succeeds after replacing an existing array key via add()+FromNativeArray (regression for whole-file err-53 corruption)", () => {
+  const fj = new FlexJson('{"vid": "test", "category": ["old"]}', true);
+  fj.add(FlexJson.FromNativeArray(["#a", "#b"]), "category");
+
+  const result = fj.WriteToFile(tempFile);
+  assert.strictEqual(result, 0);
+  assert.strictEqual(fj.Status, 0);
+
+  const reread = new FlexJson();
+  reread.DeserializeFlexFile(tempFile);
+  assert.strictEqual(reread.Status, 0);
+  assert.strictEqual(reread.getStr("vid"), "test");
+  assert.deepStrictEqual(reread.item("category").toNative(), ["#a", "#b"]);
+
+  fs.unlinkSync(tempFile);
+});
+
+// ============================================================================
+// NATIVE VALUE CONVERSION TESTS (FromNativeArray / FromNativeObject / FromNative)
+// ============================================================================
+section("Native Value Conversion");
+
+test("FlexJson.FromNativeArray() converts a native array to a FlexJson array node", () => {
+  const node = FlexJson.FromNativeArray(["a", "b", "c"]);
+  assert.strictEqual(node.jsonType, "array");
+  assert.strictEqual(node.length, 3);
+  assert.strictEqual(node.item(0).thisValue, "a");
+  assert.strictEqual(node.item(2).thisValue, "c");
+});
+
+test("FlexJson.FromNativeArray() recursively converts nested arrays/objects", () => {
+  const node = FlexJson.FromNativeArray([{ a: 1 }, [2, 3]]);
+  assert.strictEqual(node.item(0).jsonType, "object");
+  assert.strictEqual(node.item(0).getNum("a"), 1);
+  assert.strictEqual(node.item(1).jsonType, "array");
+  assert.strictEqual(node.item(1).item(1).thisValue, 3);
+});
+
+test("FlexJson.FromNativeArray() on empty array produces an empty FlexJson array", () => {
+  const node = FlexJson.FromNativeArray([]);
+  assert.strictEqual(node.jsonType, "array");
+  assert.strictEqual(node.length, 0);
+});
+
+test("FlexJson.FromNativeArray() result serializes correctly", () => {
+  const node = FlexJson.FromNativeArray(["x", "y"]);
+  assert.strictEqual(node.Stringify(), '["x","y"]');
+});
+
+test("FlexJson.FromNativeObject() converts a native object to a FlexJson object node", () => {
+  const node = FlexJson.FromNativeObject({ name: "John", age: 30 });
+  assert.strictEqual(node.jsonType, "object");
+  assert.strictEqual(node.getStr("name"), "John");
+  assert.strictEqual(node.getNum("age"), 30);
+});
+
+test("FlexJson.FromNativeObject() recursively converts nested values", () => {
+  const node = FlexJson.FromNativeObject({ tags: ["a", "b"], meta: { x: 1 } });
+  assert.strictEqual(node.item("tags").jsonType, "array");
+  assert.strictEqual(node.item("tags").length, 2);
+  assert.strictEqual(node.item("meta").jsonType, "object");
+  assert.strictEqual(node.item("meta").getNum("x"), 1);
+});
+
+test("FlexJson.FromNativeObject() on empty object produces an empty FlexJson object", () => {
+  const node = FlexJson.FromNativeObject({});
+  assert.strictEqual(node.jsonType, "object");
+  assert.strictEqual(node.length, 0);
+});
+
+test("FlexJson.FromNativeObject() result serializes correctly", () => {
+  const node = FlexJson.FromNativeObject({ a: 1, b: "two" });
+  assert.strictEqual(node.Stringify(), '{"a":1,"b":"two"}');
+});
+
+test("FlexJson.FromNative() dispatches array to FromNativeArray", () => {
+  const node = FlexJson.FromNative(["a", "b"]);
+  assert.strictEqual(node.jsonType, "array");
+  assert.strictEqual(node.length, 2);
+});
+
+test("FlexJson.FromNative() dispatches plain object to FromNativeObject", () => {
+  const node = FlexJson.FromNative({ a: 1 });
+  assert.strictEqual(node.jsonType, "object");
+  assert.strictEqual(node.getNum("a"), 1);
+});
+
+test("FlexJson.FromNative() dispatches null to CreateNull()", () => {
+  const node = FlexJson.FromNative(null);
+  assert.strictEqual(node.jsonType, "null");
+});
+
+test("FlexJson.FromNative() wraps primitives via thisValue", () => {
+  const strNode = FlexJson.FromNative("hello");
+  assert.strictEqual(strNode.thisValue, "hello");
+  const numNode = FlexJson.FromNative(42);
+  assert.strictEqual(numNode.toNum(), 42);
+  const boolNode = FlexJson.FromNative(true);
+  assert.strictEqual(boolNode.toBool(), true);
+});
+
+test("FlexJson.FromNative() returns an existing FlexJson instance as-is", () => {
+  const existing = new FlexJson('{"a": 1}', true);
+  const result = FlexJson.FromNative(existing);
+  assert.strictEqual(result, existing);
+});
+
+test("FlexJson.FromNativeArray() node works with add() to replace an existing key", () => {
+  const fj = new FlexJson('{"category": ["old-cat"]}', true);
+  fj.add(FlexJson.FromNativeArray(["#economics", "#business"]), "category");
+  assert.strictEqual(fj.Status, 0);
+  assert.strictEqual(fj.item("category").length, 2);
+  assert.strictEqual(fj.item("category").item(0).thisValue, "#economics");
+});
+
+test("FlexJson.FromNativeArray() node works with add() to insert a new key", () => {
+  const fj = new FlexJson('{"name": "John"}', true);
+  fj.add(FlexJson.FromNativeArray(["1", "2"]), "newTags");
+  assert.strictEqual(fj.item("newTags").jsonType, "array");
+  assert.strictEqual(fj.item("newTags").length, 2);
+});
+
 // ============================================================================
 // UTILITY METHOD TESTS
 // ============================================================================
